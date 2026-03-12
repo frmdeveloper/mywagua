@@ -1,0 +1,16 @@
+{
+    "name": "mywagua",
+    "version": "0.0.1",
+    "author": "FRM Developer",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/frmdeveloper/mywagua"
+    },
+    "main": "index.js",
+    "exports": {
+        ".": "./index.js"
+    },
+    "scripts": {
+        "postinstall": "go get -u && go build -buildmode=c-shared -o main.node ."
+    }
+}
