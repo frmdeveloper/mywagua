@@ -36,8 +36,7 @@ npm install mywagua
 ### Quick Start
 
 ```javascript
-import { makeWASocket } from "./index.js"
-import util from "util"
+import { makeWASocket } from "mywagua"
 
 const conn = makeWASocket({
     DbPath: "anu.db"
