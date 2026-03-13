@@ -3,12 +3,12 @@ import util from "util"
 
 const conn = makeWASocket({
     DbPath: "anu.db"
-    //Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
+    Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
 })
 console.log(conn)
 if (!conn.Store().ID) {
     conn.Connect()
-    console.log(conn.PairPhone("tes"))
+    console.log(conn.PairPhone("62xxx"))
     setInterval(() => {
         if (!conn.IsLoggedIn()) {
             conn.Disconnect()
