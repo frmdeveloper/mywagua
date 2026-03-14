@@ -30,16 +30,17 @@ ___
 ### Installation
 
 ```bash
-npm install mywagua
+npm install mywagua@github:frmdeveloper/mywagua
 ```
 
 ### Quick Start
 
 ```javascript
 import { makeWASocket } from "mywagua"
+//const { makeWASocket } = require("mywagua")
 
 const conn = makeWASocket({
-    DbPath: "anu.db"
+    DbPath: "anu.db",
     Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
 })
 console.log(conn)
@@ -64,7 +65,7 @@ conn.Event((a) => {
 
 <div align="center">
 
-**Made with ❤️**
+**Made with 💩**
 
 *If this project helped you, please consider giving it a ⭐ on GitHub!*
 
