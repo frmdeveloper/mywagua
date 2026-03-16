@@ -28,7 +28,19 @@ const sock = {
         console.log(`client.${name}(${command})`)
         return go.run(`client.${name}(${command})`)
     },
-    Store() { return JSON.parse(go.GetStore()) }
+    Store() { return JSON.parse(go.GetStore()) },
+    getDevice(id) {
+	return /^3A.{18}$/.test(id)
+		? 'ios'
+		: /^3E.{20}$/.test(id)
+			? 'web'
+			: /^(.{21}|.{32})$/.test(id)
+				? 'android'
+				: /^(3F|.{18}$)/.test(id)
+					? 'desktop'
+					: 'unknown'
+    },
+    decodeJid(jid) { return jid.replace(/:[0-9]+/,"") }
 }
 return sock
 }
