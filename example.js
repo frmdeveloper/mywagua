@@ -8,7 +8,7 @@ const conn = makeWASocket({
 console.log(conn)
 if (!conn.Store().ID) {
     conn.Connect()
-    console.log(conn.PairPhone("6287845244334"))
+    console.log(conn.PairPhone("xxx"))
     setInterval(() => {
         if (!conn.IsLoggedIn()) {
             conn.Disconnect()
@@ -16,7 +16,7 @@ if (!conn.Store().ID) {
     }, 60000)
 } else {
     conn.Connect()
-    const a = conn.SetGroupLocked("120363186235853203@g.us", true)
+    const a = conn.SetGroupLocked("xxx@g.us", true)
     console.log(a)
 }
 conn.Event((a) => {
