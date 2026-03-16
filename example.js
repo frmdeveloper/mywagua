@@ -3,12 +3,12 @@ import util from "util"
 
 const conn = makeWASocket({
     DbPath: "anu.db"
-    Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
+    //Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
 })
 console.log(conn)
 if (!conn.Store().ID) {
     conn.Connect()
-    console.log(conn.PairPhone("62xxx"))
+    console.log(conn.PairPhone("6287845244334"))
     setInterval(() => {
         if (!conn.IsLoggedIn()) {
             conn.Disconnect()
@@ -16,8 +16,8 @@ if (!conn.Store().ID) {
     }, 60000)
 } else {
     conn.Connect()
-    conn.SendPresence("available")
-    conn.SendPresence("unavailable")
+    const a = conn.SetGroupLocked("120363186235853203@g.us", true)
+    console.log(a)
 }
 conn.Event((a) => {
     //console.log(a)

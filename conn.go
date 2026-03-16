@@ -79,6 +79,37 @@ conn["DownloadAny"] = func(msg any) any {
     buf,_ := napi.CopyBuffer(env, ok)
     return buf
 }
+conn["FollowNewsletter"] = func(jid string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.FollowNewsletter(ctx, Jid)
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["GetBlocklist"] = func() any {
+    res,err := Cli.GetBlocklist(ctx)
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
+conn["GetBusinessProfile"] = func(jid string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    res,err := Cli.GetBusinessProfile(ctx, Jid)
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
+conn["GetContactQRLink"] = func(revoke bool) any {
+    res,err := Cli.GetContactQRLink(ctx, revoke)
+    if err != nil { return Throw(env,err) }
+    return res
+}
+conn["GetGroupInfo"] = func(jid string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    res,err := Cli.GetGroupInfo(ctx, Jid)
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
 conn["GetGroupRequestParticipants"] = func(jid string) any {
     Jid,err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
@@ -90,6 +121,16 @@ conn["GetJoinedGroups"] = func() any {
     res,err := Cli.GetJoinedGroups(ctx)
     if err != nil { return Throw(env,err) }
     return Res(res)
+}
+conn["GetProfilePictureInfo"] = func(jid string, params any) any {
+    Jid, _ := types.ParseJID(jid)
+    var param *whatsmeow.GetProfilePictureParams
+    ua := json.Unmarshal([]byte(ToJson(params)), &param)
+    if ua != nil { return Throw(env,ua) }
+
+    pp, err := Cli.GetProfilePictureInfo(ctx, Jid, param)
+    if err != nil { return Throw(env,err) }
+    return Res(pp)
 }
 conn["GetUserInfo"] = func(jids any) any {
     var Jids []types.JID
@@ -122,10 +163,14 @@ conn["JoinGroupWithLink"] = func(code string) any {
 conn["LeaveGroup"] = func(jid string) any {
     Jid,err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
-    return Throw(env, Cli.LeaveGroup(ctx, Jid))
+    err = Cli.LeaveGroup(ctx, Jid)
+    if err != nil { return Throw(env, err) }
+    return nil
 }
 conn["Logout"] = func() any {
-    return Throw(env, Cli.Logout(ctx))
+    err := Cli.Logout(ctx)
+    if err != nil { return Throw(env, err) }
+    return nil
 }
 conn["PairPhone"] = func(nomor string) any {
     linkingCode, err := Cli.PairPhone(ctx, nomor, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
@@ -153,15 +198,33 @@ conn["SendPresence"] = func(state string) any {
     if err != nil { return Throw(env,err) }
     return ""
 }
-conn["GetProfilePictureInfo"] = func(jid string, params any) any {
-    Jid, _ := types.ParseJID(jid)
-    var param *whatsmeow.GetProfilePictureParams
-    ua := json.Unmarshal([]byte(ToJson(params)), &param)
-    if ua != nil { return Throw(env,ua) }
-
-    pp, err := Cli.GetProfilePictureInfo(ctx, Jid, param)
-    if err != nil { return Throw(env,err) }
-    return Res(pp)
+conn["SetGroupAnnounce"] = func(jid string, announce bool) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupAnnounce(ctx, Jid, announce)
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["SetGroupDescription"] = func(jid string, description string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupDescription(ctx, Jid, description)
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["SetGroupJoinApprovalMode"] = func(jid string, mode bool) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupJoinApprovalMode(ctx, Jid, mode)
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["SetGroupLocked"] = func(jid string, locked bool) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupLocked(ctx, Jid, locked)
+    if err != nil { return Throw(env, err) }
+    return nil
 }
 conn["Upload"] = func(args L, tipeM string) any {
     msg,err := c.WaUpload(args, whatsmeow.MediaType(tipeM))
