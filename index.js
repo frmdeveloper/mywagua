@@ -1,3 +1,4 @@
+import { simple } from "./simple.js"
 import { createRequire } from "module"
 const require = createRequire(import.meta.url)
 const addon = require("./main.node")
@@ -14,7 +15,7 @@ JSON.parse(types).forEach(i => {
     if (i.type == "function") mapped[i.name] = null
 })
 const sock = {
-    ...mapped, ...go,
+    ...mapped, ...go, simple,
     Event(callback) {
         setInterval(() => go.getEvt().forEach(i=>callback(JSON.parse(i))),100)
     },
