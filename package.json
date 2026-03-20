@@ -3,8 +3,7 @@
     "version": "0.0.2",
     "author": "FRM Developer",
     "repository": {
-        "type": "git",
-        "url": "git+https://github.com/frmdeveloper/mywagua"
+        "url": "git@github.com:frmdeveloper/mywagua.git"
     },
     "main": "index.js",
     "exports": {
