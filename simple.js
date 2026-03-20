@@ -1,4 +1,4 @@
-export const simple = async(conn, m) => {
+const simple = async(conn, m) => {
     if (!m) return {}
 
     const msg = {}
@@ -50,3 +50,4 @@ export const simple = async(conn, m) => {
     }
     return msg
 }
+export default simple
