@@ -41,6 +41,7 @@ import { makeWASocket } from "mywagua"
 
 const conn = makeWASocket({
     DbPath: "anu.db",
+    OsName: "My WA Gua", 
     Logger: { Database: "DEBUG", Client: "DEBUG", Color: true }
 })
 console.log(conn)
