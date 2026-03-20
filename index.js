@@ -1,4 +1,5 @@
-import { simple } from "./simple.js"
+import simple from "./simple.js"
+import * as message from "./message.js"
 import { createRequire } from "module"
 const require = createRequire(import.meta.url)
 const addon = require("./main.node")
@@ -15,7 +16,7 @@ JSON.parse(types).forEach(i => {
     if (i.type == "function") mapped[i.name] = null
 })
 const sock = {
-    ...mapped, ...go, simple,
+    ...mapped, ...go, simple, 
     Event(callback) {
         setInterval(() => go.getEvt().forEach(i=>callback(JSON.parse(i))),100)
     },
@@ -42,5 +43,16 @@ const sock = {
     },
     decodeJid(jid) { return jid.replace(/:[0-9]+/,"") }
 }
-return sock
+
+return {...sock, ...binder(message,go)}
+}
+
+function binder(target, fill) {
+    const binded = {}
+    for (const key in target) {
+        if (typeof target[key] === "function") {
+            binded[key] = target[key].bind(fill)
+        }
+    }
+    return binded
 }
