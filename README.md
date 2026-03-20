@@ -54,11 +54,9 @@ if (!conn.Store().ID) {
     }, 60000)
 } else {
     conn.Connect()
-    conn.SendPresence("available")
-    conn.SendPresence("unavailable")
 }
-conn.Event((a) => {
-    console.log(a)
+conn.Event(async({type, evt}) => {
+    //...
 })
 ```
 ---
