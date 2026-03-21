@@ -4,8 +4,8 @@ go 1.25.4
 
 require (
 	github.com/dop251/goja v0.0.0-20260311135729-065cd970411c
-	github.com/ncruces/go-sqlite3 v0.32.0
-	go.mau.fi/whatsmeow v0.0.0-20260305215846-fc65416c22c4
+	github.com/mattn/go-sqlite3 v1.14.37
+	go.mau.fi/whatsmeow v0.0.0-20260321154921-234105b0ae55
 	google.golang.org/protobuf v1.36.11
 	sirherobrine23.com.br/Sirherobrine23/napi-go v0.1.2
 )
@@ -21,13 +21,11 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/petermattis/goid v0.0.0-20260226131333-17d1149c6ac6 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
-	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.32 // indirect
 	go.mau.fi/libsignal v0.2.1 // indirect
-	go.mau.fi/util v0.9.6 // indirect
+	go.mau.fi/util v0.9.7 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
 	golang.org/x/net v0.52.0 // indirect

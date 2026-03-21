@@ -16,8 +16,7 @@ import (
     waLog "go.mau.fi/whatsmeow/util/log"
     _ "unsafe"
     _ "sirherobrine23.com.br/Sirherobrine23/napi-go/module"
-    _ "github.com/ncruces/go-sqlite3/driver"
-    _ "github.com/ncruces/go-sqlite3/embed"
+    _ "github.com/mattn/go-sqlite3"
 )
 
 var ctx = context.Background()
