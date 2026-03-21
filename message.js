@@ -9,23 +9,26 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
     if ("text" in content) {
         message = { extendedTextMessage: { text: content.text } }
     }
-    if ("image" in content) {
+    const mediatype = Object.keys(content)[0]
+                    ?.match(/(image|sticker|video|document)/i)?.[0]
+    if (mediatype) {
+        const isSticker = mediatype == "sticker"
         let mediacontent
-        if ("url" in content.image) {
-            if (isUrl(content.image.url)) mediacontent = { Url: content.image.url }
-            if (existsSync(content.image.url)) mediacontent = { File: content.image.url }
+        if ("url" in content[mediatype]) {
+            if (isUrl(content[mediatype].url)) mediacontent = { Url: content[mediatype].url }
+            if (existsSync(content[mediatype].url)) mediacontent = { File: content[mediatype].url }
         }
-        if ("base64" in content.image) {
-            mediacontent = { Base64: content.image.base64 }
-        }
-        const upload = this.Upload(mediacontent, "WhatsApp Image Keys")
-        message = { imageMessage: upload }
-        if ("caption" in content) message.imageMessage.caption = content.caption
-    }
+        if ("base64" in content[mediatype]) mediacontent = { Base64: content[mediatype].base64 }
+        const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
+        const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
+        message[mediatype+"Message"] = upload
+        if (isSticker) message[mediatype+"Message"].mimetype = "image/webp"
+    } 
     const key = getContentType(message)
-    if ("contextInfo" in content) {
-        message[key].contextInfo = content.contextInfo
-    }
+    if ("caption" in content) message[key].caption = content.caption
+    if ("mimetype" in content) message[key].mimetype = content.mimetype
+    if ("fileName" in content) message[key].fileName = content.fileName
+    if ("contextInfo" in content) message[key].contextInfo = content.contextInfo
     if ("mentions" in content) {
         message[key].contextInfo = message[key].contextInfo || {}
         message[key].contextInfo.mentionedJID = content.mentions
