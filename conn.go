@@ -231,6 +231,18 @@ conn["Upload"] = func(args L, tipeM string) any {
     if err != nil { return Throw(env,err) }
     return Res(msg)
 }
+conn["UpdateGroupParticipants"] = func(jid string, participantChanges any, action string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    
+    var Jids []types.JID
+    err = json.Unmarshal([]byte(ToJson(participantChanges)), &Jids)
+    if err != nil { return Throw(env,err) }
+
+    res,err := Cli.UpdateGroupParticipants(ctx, Jid, Jids, whatsmeow.ParticipantChange(action))
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
 conn["ParseMention"] = func(text string) []string {
     res := []string{}
     matches := regexp.MustCompile("@([0-9]{5,16}|0)").FindAllStringSubmatch(text, -1)
