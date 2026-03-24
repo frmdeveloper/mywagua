@@ -18,7 +18,7 @@ JSON.parse(types).forEach(i => {
 const sock = {
     ...mapped, ...go, simple, 
     Event(callback) {
-        setInterval(() => go.getEvt().forEach(i=>callback(JSON.parse(i))),100)
+        return setInterval(() => go.getEvt().forEach(i=>callback(JSON.parse(i))),100)
     },
     Call(name, ...arg) {
         const command = arg.map(a => {
