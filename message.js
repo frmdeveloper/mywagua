@@ -42,6 +42,9 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
     if (("text" in content) && !message[key].contextInfo) {
         message = { conversation:content.text }
     }
+    if ("delete" in content) {
+        message = { protocolMessage:{ key:content.delete.key, type:0 } }
+    }
     return message
 }
 export function getContentType(content) {

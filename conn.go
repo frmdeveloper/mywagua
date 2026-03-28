@@ -62,6 +62,14 @@ c := &Conn{C:Cli}
 conn["GetStore"] = func() any {
     return ToJson(Cli.Store)
 }
+conn["BuildRevoke"] = func(chat string, sender string, id string) any {
+    Chat,err := types.ParseJID(chat)
+    if err != nil { return Throw(env, err) }
+    Sender,err := types.ParseJID(sender)
+    if err != nil { return Throw(env, err) }
+    res := Cli.BuildRevoke(Chat, Sender, types.MessageID(id))
+    return Res(res)
+}
 conn["Connect"] = func() any {
     err := Cli.Connect()
     if err != nil { return Throw(env,err) }
