@@ -3,29 +3,29 @@
 
 # 🫪 My WA Gua 🫪
 
-### *WhatsApp Automation Made Simple Piw Piw from Whatsmeow*
+### *Whatsmeow kok Nodejs*
 ---
 </div>
 
-## ✨ What is My WA Gua?
+## What is My WA Gua?
 
 Anu, this is a project gabut for my self njir. Don't use this if you are not bored!!
 
-### 🎯 Why Choose This?
+### Why Choose This?
 
-- **🔥 Unique** - even though there is already WhatsApp automation available for NodeJS like Baileys, it shoots Whatsmeow instead
+- **Unique** - even though there is already WhatsApp automation available for NodeJS like Baileys, it shoots Whatsmeow instead
 ---
 
-## 🌟 Features
+## Features
 
-### Explore for yourself 👍
+Explore for yourself 👍
 ___
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Nodejs 20+
-- Go 1.19+ (for building whatsmeow)
+- Go 1.20+ (for building whatsmeow)
 
 ### Installation
 
@@ -66,6 +66,6 @@ conn.Event(async({type, evt}) => {
 
 **Made with 💩**
 
-*If this project helped you, please consider giving it a ⭐ on GitHub!*
+*tai lu bang*
 
 </div>
