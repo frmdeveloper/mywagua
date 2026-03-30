@@ -1,7 +1,7 @@
 <div align="center">
 <img src="assets/bukankahinimy.jpg" width="30%">
 
-# 🚀 My WA Gua
+# 🫪 My WA Gua 🫪
 
 ### *WhatsApp Automation Made Simple Piw Piw from Whatsmeow*
 ---
