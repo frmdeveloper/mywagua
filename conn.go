@@ -370,7 +370,7 @@ func (c *Conn) RelayMessage(jid string, message *waProto.Message, a L) (*events.
     if a.Edit != "" {
         message = c.C.BuildEdit(Jid, a.Edit, message)
     }
-    send, err := c.C.SendMessage(context.Background(), Jid, message, whatsmeow.SendRequestExtra{ID:c.GenerateMessageID()})
+    send, err := c.C.SendMessage(context.Background(), Jid, message, whatsmeow.SendRequestExtra{ID:c.C.GenerateMessageID()})
     return &events.Message{
         Info: types.MessageInfo{
             ID: send.ID,
