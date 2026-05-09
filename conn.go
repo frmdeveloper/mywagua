@@ -327,6 +327,8 @@ func (c *Conn) RelayMessage(jid string, message *waProto.Message, a L) (*events.
     return &events.Message{
         Info: types.MessageInfo{
             ID: send.ID,
+            ServerID: send.ServerID,
+            Timestamp: send.Timestamp,
             MessageSource: types.MessageSource{
                 Chat: Jid,
                 Sender: *c.C.Store.ID,
