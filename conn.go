@@ -296,9 +296,9 @@ func (c *Conn) ParseMention(text string) []string {
     }
     return res
 }
-func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (whatsmeow.UploadResponse, error) {
+func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (J, error) {
     dow, err := GetByte(args)
-    if err != nil { return whatsmeow.UploadResponse{}, err }
+    if err != nil { return nil, err }
     var uploaded whatsmeow.UploadResponse
     var uperr error
     if newsletter {
@@ -306,8 +306,17 @@ func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (wha
     } else {
         uploaded, err = c.C.Upload(context.Background(), dow.Byte, tipeM)
     }
-    if uperr != nil { return whatsmeow.UploadResponse{}, uperr }
-    return uploaded, nil
+    if uperr != nil { return nil, uperr }
+    return J{
+        "URL": uploaded.URL,
+        "directPath": uploaded.DirectPath,
+        "handle": uploaded.Handle,
+        "objectID": uploaded.ObjectID,
+        "mediaKey": uploaded.MediaKey,
+        "fileEncSHA256": uploaded.FileEncSHA256,
+        "fileSHA256": uploaded.FileSHA256,
+        "fileLength": uploaded.FileLength,
+    }, nil
 }
 func (c *Conn) RelayMessage(jid string, message *waProto.Message, a L) (*events.Message, error) {
     Jid, _ := types.ParseJID(jid)
