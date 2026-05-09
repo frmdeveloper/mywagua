@@ -20,7 +20,7 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         }
         if ("base64" in content[mediatype]) mediacontent = { Base64: content[mediatype].base64 }
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
-        const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
+        const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys", false)
         message[mediatype+"Message"] = upload
         if (mediatype == "audio") message[mediatype+"Message"].mimetype = "audio/mpeg"
         if (mediatype == "image") message[mediatype+"Message"].mimetype = "image/jpeg"
