@@ -277,60 +277,6 @@ conn["relayMessage"] = func(jid string, message any, a any) any {
     if err != nil { return Throw(env,err) }
     return Res(ok)
 }
-conn["sendText"] = func(jid string, text any, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-
-    ok,err := c.SendText(jid, fmt.Sprintf("%s",text) ,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
-conn["sendMedia"] = func(jid string, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-
-    ok,err := c.SendMedia(jid,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
-conn["sendImage"] = func(jid string, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-    b.Type = whatsmeow.MediaType("WhatsApp Image Keys")
-    ok,err := c.SendMedia(jid,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
-conn["sendVideo"] = func(jid string, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-    b.Type = whatsmeow.MediaType("WhatsApp Video Keys")
-    ok,err := c.SendMedia(jid,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
-conn["sendSticker"] = func(jid string, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-    b.Type = whatsmeow.MediaType("WhatsApp Sticker Keys")
-    ok,err := c.SendMedia(jid,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
-conn["sendAudio"] = func(jid string, a any) any {
-    var b L
-    er := json.Unmarshal([]byte(ToJson(a)), &b)
-    if er != nil { return Throw(env,er) }
-    b.Type = whatsmeow.MediaType("WhatsApp Audio Keys")
-    ok,err := c.SendMedia(jid,b)
-    if err != nil { return Throw(env,err) }
-    return Res(ok)
-}
 return conn
 }
 
@@ -350,9 +296,9 @@ func (c *Conn) ParseMention(text string) []string {
     }
     return res
 }
-func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (*waProto.ImageMessage, error) {
+func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (whatsmeow.UploadResponse, error) {
     dow, err := GetByte(args)
-    if err != nil { return nil, err }
+    if err != nil { return whatsmeow.UploadResponse{}, err }
     var uploaded whatsmeow.UploadResponse
     var uperr error
     if newsletter {
@@ -360,21 +306,8 @@ func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (*wa
     } else {
         uploaded, err = c.C.Upload(context.Background(), dow.Byte, tipeM)
     }
-    if uperr != nil { return nil, uperr }
-    var mtype *string
-    if (tipeM == "WhatsApp Image Keys") { mtype = proto.String("image/jpeg") }
-    if (tipeM == "WhatsApp Video Keys") { mtype = proto.String("video/mp4") }
-    if (tipeM == "WhatsApp Audio Keys") { mtype = proto.String("audio/mpeg") }
-    if (args.Mimetype != nil) { mtype = args.Mimetype }
-    return &waProto.ImageMessage{
-        URL:           proto.String(uploaded.URL),
-        DirectPath:    proto.String(uploaded.DirectPath),
-        MediaKey:      uploaded.MediaKey,
-        Mimetype:      mtype,
-        FileEncSHA256: uploaded.FileEncSHA256,
-        FileSHA256:    uploaded.FileSHA256,
-        FileLength:    proto.Uint64(uint64(dow.Length)),
-    }, nil
+    if uperr != nil { return whatsmeow.UploadResponse{}, uperr }
+    return uploaded, nil
 }
 func (c *Conn) RelayMessage(jid string, message *waProto.Message, a L) (*events.Message, error) {
     Jid, _ := types.ParseJID(jid)
@@ -422,42 +355,6 @@ func (c *Conn) SendText(jid string, text string, a L) (*events.Message, error) {
             ContextInfo: co,
         },
     }, a)
-}
-func (c *Conn) SendMedia(jid string, a L) (*events.Message, error) {
-    var mentionedjid []string
-    if a.ParseMention {
-        mentionedjid = c.ParseMention(a.Caption)
-    } else {
-        mentionedjid = a.Mentions
-    }
-    var typenya string
-    if a.Type == "WhatsApp Sticker Keys" {
-        typenya = "StickerMessage"
-        a.Type = "WhatsApp Image Keys"
-        a.Mimetype = proto.String("image/webp")
-    } else {
-        typenya = MediaType[fmt.Sprintf("%s",a.Type)].(string)
-    }
-    up, err := c.WaUpload(a, a.Type, false)
-    if err != nil { return nil, err }
-    co := c.quoted(a)
-    co.MentionedJID = mentionedjid
-    medias := J{
-      typenya: J{
-        "URL": up.URL,
-        "DirectPath": up.DirectPath,
-        "MediaKey": up.MediaKey,
-        "Mimetype": up.Mimetype,
-        "FileEncSHA256": up.FileEncSHA256,
-        "FileSHA256": up.FileSHA256,
-        "FileLength": up.FileLength,
-        "Caption": &a.Caption,
-        "ContextInfo": co,
-      },
-    }
-    var msgg *waProto.Message
-    json.Unmarshal([]byte(ToJson(medias)), &msgg)
-    return c.RelayMessage(jid, msgg, a)
 }
 
 func Atob(base string) ([]byte) {

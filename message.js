@@ -10,7 +10,7 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         message = { extendedTextMessage: { text: content.text } }
     }
     const mediatype = Object.keys(content)[0]
-                    ?.match(/(image|sticker|video|document)/i)?.[0]
+                    ?.match(/(audio|image|sticker|video|document)/i)?.[0]
     if (mediatype) {
         const isSticker = mediatype == "sticker"
         let mediacontent
