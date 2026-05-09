@@ -13,6 +13,10 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
                     ?.match(/(audio|image|sticker|video|document)/i)?.[0]
     if (mediatype) {
         const isSticker = mediatype == "sticker"
+        if (mediatype == "audio") message[mediatype+"Message"].mimetype = "audio/mpeg"
+        if (mediatype == "image") message[mediatype+"Message"].mimetype = "image/jpeg"
+        if (mediatype == "video") message[mediatype+"Message"].mimetype = "video/mp4"
+        if (mediatype == "sticker") message[mediatype+"Message"].mimetype = "image/webp"
         let mediacontent
         if ("url" in content[mediatype]) {
             if (isUrl(content[mediatype].url)) mediacontent = { Url: content[mediatype].url }
@@ -22,7 +26,6 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
         const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
         message[mediatype+"Message"] = upload
-        if (isSticker) message[mediatype+"Message"].mimetype = "image/webp"
     } 
     const key = getContentType(message)
     if ("caption" in content) message[key].caption = content.caption
