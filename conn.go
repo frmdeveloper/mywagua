@@ -235,7 +235,12 @@ conn["SetGroupLocked"] = func(jid string, locked bool) any {
     return nil
 }
 conn["Upload"] = func(args L, tipeM string) any {
-    msg,err := c.WaUpload(args, whatsmeow.MediaType(tipeM))
+    msg,err := c.WaUpload(args, whatsmeow.MediaType(tipeM), false)
+    if err != nil { return Throw(env,err) }
+    return Res(msg)
+}
+conn["UploadNewsletter"] = func(args L, tipeM string) any {
+    msg,err := c.WaUpload(args, whatsmeow.MediaType(tipeM), true)
     if err != nil { return Throw(env,err) }
     return Res(msg)
 }
@@ -345,11 +350,17 @@ func (c *Conn) ParseMention(text string) []string {
     }
     return res
 }
-func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType) (*waProto.ImageMessage, error) {
+func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (*waProto.ImageMessage, error) {
     dow, err := GetByte(args)
     if err != nil { return nil, err }
-    uploaded, err := c.C.Upload(context.Background(), dow.Byte, tipeM)
-    if err != nil { return nil, err }
+    var uploaded whatsmeow.UploadResponse
+    var uperr error
+    if newsletter {
+        uploaded, err = c.C.UploadNewsletter(context.Background(), dow.Byte, tipeM)
+    } else {
+        uploaded, err = c.C.Upload(context.Background(), dow.Byte, tipeM)
+    }
+    if uperr != nil { return nil, uperr }
     var mtype *string
     if (tipeM == "WhatsApp Image Keys") { mtype = proto.String("image/jpeg") }
     if (tipeM == "WhatsApp Video Keys") { mtype = proto.String("video/mp4") }
@@ -427,7 +438,7 @@ func (c *Conn) SendMedia(jid string, a L) (*events.Message, error) {
     } else {
         typenya = MediaType[fmt.Sprintf("%s",a.Type)].(string)
     }
-    up, err := c.WaUpload(a, a.Type)
+    up, err := c.WaUpload(a, a.Type, false)
     if err != nil { return nil, err }
     co := c.quoted(a)
     co.MentionedJID = mentionedjid
