@@ -1,4 +1,5 @@
-import { existsSync } from "fs"
+import { writeFileSync, existsSync, rmSync } from "fs"
+import {randomBytes} from "crypto"
 
 export async function sendMessage(jid, content = {}, options = {}) {
     const message = await generateWAMessageFromContent.bind(this)(jid, content, options)
@@ -14,6 +15,17 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
     if (mediatype) {
         const isSticker = mediatype == "sticker"
         let mediacontent
+        let rand
+        if (Buffer.isBuffer(content[mediatype])) {
+            if (content[mediatype].length <= 5242880) {
+                const b64 = content[mediatype].toString("base64")
+                content[mediatype] = {base64:b64}
+            } else {
+                rand = randomBytes(14).toString('hex')
+                writeFileSync("assets/"+rand)
+                content[mediatype] = {url:"assets/"+rand}
+            }
+        }
         if ("url" in content[mediatype]) {
             if (isUrl(content[mediatype].url)) mediacontent = { Url: content[mediatype].url }
             if (existsSync(content[mediatype].url)) mediacontent = { File: content[mediatype].url }
@@ -21,6 +33,7 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         if ("base64" in content[mediatype]) mediacontent = { Base64: content[mediatype].base64 }
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
         const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
+        if (rand) rmSync("assets/"+rand)
         message[mediatype+"Message"] = upload
         if (mediatype == "audio") message[mediatype+"Message"].mimetype = "audio/mpeg"
         if (mediatype == "image") message[mediatype+"Message"].mimetype = "image/jpeg"
