@@ -22,7 +22,7 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
                 content[mediatype] = {base64:b64}
             } else {
                 rand = randomBytes(14).toString('hex')
-                writeFileSync("assets/"+rand)
+                writeFileSync("assets/"+rand, content[mediatype])
                 content[mediatype] = {url:"assets/"+rand}
             }
         }
