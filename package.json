@@ -10,6 +10,7 @@
         ".": "./index.js"
     },
     "scripts": {
+        "build": "go build -buildmode=c-shared -o main.node .",
         "postinstall": "go get -u && go build -buildmode=c-shared -o main.node ."
     }
 }

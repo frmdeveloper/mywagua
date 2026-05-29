@@ -118,6 +118,13 @@ conn["GetGroupInfo"] = func(jid string) any {
     if err != nil { return Throw(env,err) }
     return Res(res)
 }
+conn["GetGroupInviteLink"] = func(jid string, reset bool) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    res,err := Cli.GetGroupInviteLink(ctx, Jid, reset)
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
 conn["GetGroupRequestParticipants"] = func(jid string) any {
     Jid,err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
@@ -231,6 +238,20 @@ conn["SetGroupLocked"] = func(jid string, locked bool) any {
     Jid,err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
     err = Cli.SetGroupLocked(ctx, Jid, locked)
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["SetGroupMemberAddMode"] = func(jid string, mode string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupMemberAddMode(ctx, Jid, types.GroupMemberAddMode(mode))
+    if err != nil { return Throw(env, err) }
+    return nil
+}
+conn["SetGroupName"] = func(jid string, name string) any {
+    Jid,err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    err = Cli.SetGroupName(ctx, Jid, name)
     if err != nil { return Throw(env, err) }
     return nil
 }
