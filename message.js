@@ -32,6 +32,7 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         }
         if ("base64" in content[mediatype]) mediacontent = { Base64: content[mediatype].base64 }
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
+        if (!mediacontent) throw new Error("Media not found")
         const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
         if (rand) rmSync("assets/"+rand)
         message[mediatype+"Message"] = upload

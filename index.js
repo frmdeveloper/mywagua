@@ -18,7 +18,28 @@ JSON.parse(types).forEach(i => {
 const sock = {
     ...mapped, ...go, simple, 
     Event(callback) {
-        return setInterval(() => go.getEvt().forEach(i=>callback(JSON.parse(i))),100)
+        let stop = false
+        ;(async () => {
+            while (!stop) {
+                let events
+                try {
+                    events = await go.waitEvent()
+                } catch (e) {
+                    console.error("waitEvent error:", e)
+                    continue
+                }
+                if (events) {
+                    for (const raw of events) {
+                        try {
+                            await callback(JSON.parse(raw))
+                        } catch (e) {
+                            console.error("Event handler error:", e)
+                        }
+                    }
+                }
+            }
+        })()
+        return () => { stop = true }
     },
     Call(name, ...arg) {
         const command = arg.map(a => {

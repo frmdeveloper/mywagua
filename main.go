@@ -70,15 +70,20 @@ sock, _ := napi.GoFuncOf(env, func(cfg any) any {
     var (
         queue []string
         mu sync.Mutex
+        notify = make(chan struct{}, 1)
     )
     client.AddEventHandler(func(evt interface {}) {
         mu.Lock()
-        defer mu.Unlock()
         au := map[string]interface{}{
             "type": fmt.Sprintf("%T", evt),
             "evt": evt,
         }
         queue = append(queue, ToJson(au))
+        mu.Unlock()
+        select {
+        case notify <- struct{}{}:
+        default:
+        }
     })
 
     vm := goja.New()
@@ -100,6 +105,41 @@ sock, _ := napi.GoFuncOf(env, func(cfg any) any {
         copy(result, queue)
         queue = queue[:0]
         return result
+    }
+    conn["waitEvent"] = func() any {
+        worker, err := napi.CreateAsyncWorker(env,
+            func(env napi.EnvType) {
+                // Jalan di thread lain, boleh blocking, tidak menyentuh JS.
+                mu.Lock()
+                empty := len(queue) == 0
+                mu.Unlock()
+                if empty {
+                    <-notify
+                }
+            },
+            func(env napi.EnvType, Resolve, Reject func(napi.ValueType)) {
+                // Dijamin balik ke main thread, aman manggil API JS di sini.
+                mu.Lock()
+                result := make([]string, len(queue))
+                copy(result, queue)
+                queue = queue[:0]
+                mu.Unlock()
+                arr, err := napi.CreateArray(env, len(result))
+                if err != nil {
+                    errVal, _ := napi.CreateError(env, err.Error())
+                    Reject(errVal)
+                    return
+                }
+                for i, s := range result {
+                    v, err := napi.CreateString(env, s)
+                    if err != nil { continue }
+                    arr.Set(i, v)
+                }
+                Resolve(arr)
+            },
+        )
+        if err != nil { return Throw(env, err) }
+        return worker
     }
     return conn
 })

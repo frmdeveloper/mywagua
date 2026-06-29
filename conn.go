@@ -53,12 +53,12 @@ func Res(a any) interface{} {
     }
     return jsonData
 }
-var conn = make(map[string]any)
 type Conn struct {
     C *whatsmeow.Client
 }
 func Sends(env napi.EnvType, Cli *whatsmeow.Client) map[string]any {
 c := &Conn{C:Cli}
+conn := make(map[string]any)
 conn["GetStore"] = func() any {
     return ToJson(Cli.Store)
 }
@@ -73,7 +73,7 @@ conn["BuildRevoke"] = func(chat string, sender string, id string) any {
 conn["Connect"] = func() any {
     err := Cli.Connect()
     if err != nil { return Throw(env,err) }
-    return ""
+    return nil
 }
 conn["Disconnect"] = func() {
     Cli.Disconnect()
@@ -115,6 +115,11 @@ conn["GetGroupInfo"] = func(jid string) any {
     Jid,err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
     res,err := Cli.GetGroupInfo(ctx, Jid)
+    if err != nil { return Throw(env,err) }
+    return Res(res)
+}
+conn["GetGroupInfoFromLink"] = func(code string) any {
+    res,err := Cli.GetGroupInfoFromLink(ctx, code)
     if err != nil { return Throw(env,err) }
     return Res(res)
 }
