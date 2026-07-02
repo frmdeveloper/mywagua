@@ -5,7 +5,9 @@ const simple = async(conn, m) => {
     msg.full = m
     if (m.Info) {
         msg.id = m.Info.ID
-        msg.from = m.Info.Chat.endsWith("@lid") ? m.Info.SenderAlt?.replace(/:[0-9]+/,"") : m.Info.Chat?.replace(/:[0-9]+/,"")
+        msg.from = m.Info.Chat.endsWith("@lid") ? 
+                    (m.Info.SenderAlt?.replace(/:[0-9]+/,"") || m.Info.RecipientAlt?.replace(/:[0-9]+/,"")) :
+                    m.Info.Chat?.replace(/:[0-9]+/,"")
         msg.fromMe = m.Info.IsFromMe
         msg.isGroup = m.Info.IsGroup
         msg.sender = m.Info.SenderAlt?.replace(/:[0-9]+/,"") || m.Info.Sender?.replace(/:[0-9]+/,"")
@@ -18,6 +20,7 @@ const simple = async(conn, m) => {
         m.message = m.message.viewOnceMessageV2?.message ||
             m.message.documentWithCaptionMessage?.message ||
             m.message.editedMessage?.message?.protocolMessage?.editedMessage ||
+            m.message.deviceSentMessage?.message ||
             m.message 
         let mtype = Object.keys(m.message)
         msg.type = mtype.find(k => (k === 'conversation' || k.includes('Message')) && k !== 'senderKeyDistributionMessage')

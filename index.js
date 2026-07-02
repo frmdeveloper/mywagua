@@ -15,31 +15,32 @@ const mapped = { ctx:"golangContextBackground()" }
 JSON.parse(types).forEach(i => {
     if (i.type == "function") mapped[i.name] = null
 })
+
+// Wrap semua native Go functions dari `go` supaya toString() tampil readable
+const params = go._params || {}
+const wrappedGo = {}
+for (const [key, val] of Object.entries(go)) {
+    if (key === '_params') continue
+    if (typeof val === 'function') {
+        const p = params[key] ?? ''
+        const wrapper = { [key](...args) { return val(...args) } }[key]
+        Object.defineProperty(wrapper, 'toString', {
+            value: () => `function ${key}(${p}) { [native code] }`,
+            configurable: true
+        })
+        wrappedGo[key] = wrapper
+    } else {
+        wrappedGo[key] = val
+    }
+}
+
 const sock = {
-    ...mapped, ...go, simple, 
+    ...mapped, ...wrappedGo, simple, 
     Event(callback) {
-        let stop = false
-        ;(async () => {
-            while (!stop) {
-                let events
-                try {
-                    events = await go.waitEvent()
-                } catch (e) {
-                    console.error("waitEvent error:", e)
-                    continue
-                }
-                if (events) {
-                    for (const raw of events) {
-                        try {
-                            await callback(JSON.parse(raw))
-                        } catch (e) {
-                            console.error("Event handler error:", e)
-                        }
-                    }
-                }
-            }
-        })()
-        return () => { stop = true }
+        return setInterval(() => {
+            const evts = go.getEvt()
+            if (evts) evts.forEach(i => callback(JSON.parse(i)))
+        }, 100)
     },
     Call(name, ...arg) {
         const command = arg.map(a => {
