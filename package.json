@@ -2,6 +2,7 @@
     "name": "mywagua",
     "version": "0.0.2",
     "author": "FRM Developer",
+    "type": "module",
     "repository": {
         "url": "git@github.com:frmdeveloper/mywagua.git"
     },

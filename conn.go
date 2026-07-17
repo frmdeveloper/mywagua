@@ -13,6 +13,7 @@ import (
     "io/ioutil"
     "net/http"
     "os"
+    "os/exec"
     "path/filepath"
     "regexp"
     "strings"
@@ -1038,14 +1039,43 @@ func SetupCaller(env napi.EnvType, caller *meowcaller.Client, push func(any), co
     conn["playAudio"] = func(callId, path string) any {
         call, err := getCall(callId)
         if err != nil { return Throw(env, err) }
+
+        videoExts := map[string]bool{
+            ".mp4": true, ".mkv": true, ".avi": true, ".mov": true,
+            ".flv": true, ".webm": true, ".m4v": true, ".3gp": true,
+        }
+        actualPath := path
+        if videoExts[strings.ToLower(filepath.Ext(path))] {
+            ffmpeg, lookErr := exec.LookPath("ffmpeg")
+            if lookErr != nil {
+                for _, candidate := range []string{
+                    "/data/data/com.termux/files/usr/bin/ffmpeg",
+                    "/usr/bin/ffmpeg",
+                    "/usr/local/bin/ffmpeg",
+                } {
+                    if _, e := os.Stat(candidate); e == nil {
+                        ffmpeg = candidate
+                        lookErr = nil
+                        break
+                    }
+                }
+            }
+            if lookErr != nil { return Throw(env, fmt.Errorf("ffmpeg not found: %v", lookErr)) }
+            tmp := path + "_converted.mp3"
+            out, ffErr := exec.Command(ffmpeg, "-y", "-i", path, "-vn", "-ar", "16000", "-ac", "1", "-b:a", "64k", tmp).CombinedOutput()
+            if ffErr != nil { return Throw(env, fmt.Errorf("ffmpeg: %v\n%s", ffErr, string(out))) }
+            defer os.Remove(tmp)
+            actualPath = tmp
+        }
+
         var src meowcaller.AudioSource
-        switch strings.ToLower(filepath.Ext(path)) {
+        switch strings.ToLower(filepath.Ext(actualPath)) {
         case ".mp3":
-            src, err = meowcaller.MP3File(path)
+            src, err = meowcaller.MP3File(actualPath)
         case ".ogg", ".opus":
-            src, err = meowcaller.OpusFile(path)
+            src, err = meowcaller.OpusFile(actualPath)
         default:
-            src, err = meowcaller.WAVFile(path)
+            src, err = meowcaller.WAVFile(actualPath)
         }
         if err != nil { return Throw(env, err) }
         call.Play(src)
@@ -1100,4 +1130,13 @@ func SetupCaller(env napi.EnvType, caller *meowcaller.Client, push func(any), co
         if err != nil { return Throw(env, err) }
         return worker
     }; p["placeCall"] = "target"
+
+    conn["playVideo"] = func(callId string, path string) any {
+        call, err := getCall(callId)
+        if err != nil { return Throw(env, err) }
+        au, err := os.ReadFile(path)
+        if err != nil { return Throw(env, err) }
+        if err := call.SendVideo(au); err != nil { return Throw(env, err) }
+        return nil
+    }; p["playVideo"] = "callId, path"
 }

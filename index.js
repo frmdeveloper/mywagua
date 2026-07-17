@@ -1,14 +1,45 @@
-import simple from "./simple.js"
+import {swmeow} from "./simple.js"
 import * as message from "./message.js"
 import { createRequire } from "module"
 const require = createRequire(import.meta.url)
 const addon = require("./main.node")
 
-export const makeWASocket = (config) => {
-    const go = addon.create(config)
-    const sock = mappingSock(go)
-    return sock
+export function Container(driver = "", dsn = "", logLevel = "") {
+    const container = addon.Container(driver, dsn, logLevel)
+
+    const dbPath = (driver === "sqlite3" || driver === "")
+        ? (dsn || "file:mywagua.db").replace(/^file:/, "").split("?")[0]
+        : null
+
+    const wrap = (handle) => ({ handle, dbPath })
+
+    const orig = {
+        GetFirstDevice:  container.GetFirstDevice.bind(container),
+        GetAllDevices:   container.GetAllDevices.bind(container),
+        GetDevice:       container.GetDevice.bind(container),
+        PutDevice:       container.PutDevice.bind(container),
+    }
+
+    container.GetFirstDevice = ()      => wrap(orig.GetFirstDevice())
+    container.GetAllDevices  = ()      => (orig.GetAllDevices() || []).map(wrap)
+    container.GetDevice      = (jid)   => { const h = orig.GetDevice(jid); return h ? wrap(h) : null }
+    container.PutDevice      = ()      => wrap(orig.PutDevice())
+
+    return container
 }
+
+export function makeClient(device, config = {}) {
+    const handle = typeof device === "string" ? device : device.handle
+    const go = addon.Client(handle, config)
+    return mappingSock(go)
+}
+
+export function makeWASocket(config = {}) {
+    const container = Container("", "", "")
+    const device = container.GetFirstDevice()
+    return makeClient(device, config)
+}
+
 function mappingSock(go) {
 const types = go.run(`JSON.stringify(Object.keys(client).map(a => ({name:a,type:typeof client[a]})))`)
 const mapped = { ctx:"golangContextBackground()" }
@@ -16,7 +47,6 @@ JSON.parse(types).forEach(i => {
     if (i.type == "function") mapped[i.name] = null
 })
 
-// Wrap semua native Go functions dari `go` supaya toString() tampil readable
 const params = go._params || {}
 const wrappedGo = {}
 for (const [key, val] of Object.entries(go)) {
@@ -35,7 +65,7 @@ for (const [key, val] of Object.entries(go)) {
 }
 
 const sock = {
-    ...mapped, ...wrappedGo, simple, 
+    ...mapped, ...wrappedGo, simple:swmeow,
     Event(callback) {
         return setInterval(() => {
             const evts = go.getEvt()
@@ -53,20 +83,16 @@ const sock = {
     },
     Store() { return JSON.parse(go.GetStore()) },
     getDevice(id) {
-	return /^3A.{18}$/.test(id)
-		? 'ios'
-		: /^3E.{20}$/.test(id)
-			? 'web'
-			: /^(.{21}|.{32})$/.test(id)
-				? 'android'
-				: /^(3F|.{18}$)/.test(id)
-					? 'desktop'
-					: 'unknown'
+        return /^3A.{18}$/.test(id) ? 'ios'
+            : /^3E.{20}$/.test(id) ? 'web'
+            : /^(.{21}|.{32})$/.test(id) ? 'android'
+            : /^(3F|.{18}$)/.test(id) ? 'desktop'
+            : 'unknown'
     },
-    decodeJid(jid) { return jid.replace(/:[0-9]+/,"") }
+    decodeJid(jid) { return jid.replace(/:[0-9]+/, "") }
 }
 
-return {...sock, ...binder(message,go)}
+return {...sock, ...binder(message, go)}
 }
 
 function binder(target, fill) {

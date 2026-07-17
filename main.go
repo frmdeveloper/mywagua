@@ -7,6 +7,7 @@ import (
     "go.mau.fi/whatsmeow"
     "go.mau.fi/whatsmeow/store"
     "go.mau.fi/whatsmeow/store/sqlstore"
+    "go.mau.fi/whatsmeow/types"
     "go.mau.fi/whatsmeow/proto/waCompanionReg"
     "google.golang.org/protobuf/proto"
     "github.com/dop251/goja"
@@ -22,26 +23,18 @@ import (
     _ "unsafe"
     _ "sirherobrine23.com.br/Sirherobrine23/napi-go/module"
     _ "github.com/mattn/go-sqlite3"
+    _ "github.com/jackc/pgx/v5/stdlib"
 )
 
 var ctx = context.Background()
 type J map[string]any
 var nextHandle atomic.Uint64
-func newHandle() string { return string(nextHandle.Add(1)) }
+func newHandle() string { return fmt.Sprintf("%d", nextHandle.Add(1)) }
 func Throw(env napi.EnvType, err any) any {
-    return napi.ThrowError(env, "", fmt.Sprintf("%s",err))
+    return napi.ThrowError(env, "", fmt.Sprintf("%s", err))
 }
 
-type Config struct {
-    Logger struct {
-        Database string
-        Client string
-        Color bool
-        File string
-    }
-    DbPath string
-    OsName string
-}
+var deviceMap sync.Map
 
 type fileLogger struct {
     module   string
@@ -53,10 +46,10 @@ type fileLogger struct {
 func logLevelRank(s string) int {
     switch strings.ToUpper(s) {
     case "DEBUG": return 0
-    case "INFO": return 1
-    case "WARN": return 2
+    case "INFO":  return 1
+    case "WARN":  return 2
     case "ERROR": return 3
-    default: return 0
+    default:      return 0
     }
 }
 
@@ -74,93 +67,147 @@ func (f *fileLogger) Sub(module string) waLog.Logger {
     return &fileLogger{module: f.module + "/" + module, minLevel: f.minLevel, mu: f.mu, w: f.w}
 }
 
+func makeLogger(module, level, file string, color bool) waLog.Logger {
+    if level == "" { return nil }
+    if file != "" {
+        f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+        if err != nil { return waLog.Stdout(module, level, color) }
+        var mu sync.Mutex
+        return &fileLogger{module: module, minLevel: level, mu: &mu, w: f}
+    }
+    return waLog.Stdout(module, level, color)
+}
+
 //go:linkname RegisterNapi sirherobrine23.com.br/Sirherobrine23/napi-go/module.Register
 func RegisterNapi(env napi.EnvType, export *napi.Object) {
-sock, _ := napi.GoFuncOf(env, func(cfg any) any {
-    var config Config
-    err := json.Unmarshal([]byte(ToJson(cfg)), &config)
-    if err != nil { return Throw(env,err) }
-    
-    latestVer, err := whatsmeow.GetLatestVersion(ctx,nil)
-    if err != nil { return Throw(env,err) }
-    store.SetWAVersion(*latestVer)
-    store.DeviceProps.PlatformType = waCompanionReg.DeviceProps_DESKTOP.Enum()
-    if config.OsName == "" {
-        config.OsName = "My WA Gua"
-    }
-    store.DeviceProps.Os = proto.String(config.OsName)
-    
-    var logFile *os.File
-    if config.Logger.File != "" {
-        logFile, err = os.OpenFile(config.Logger.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+    containerFn, _ := napi.GoFuncOf(env, func(driver, dsn, logLevel string) any {
+        dbLog := makeLogger("Database", logLevel, "", false)
+
+        if driver == "" { driver = "sqlite3" }
+        if dsn == "" { dsn = "file:mywagua.db?_foreign_keys=on" }
+
+        container, err := sqlstore.New(ctx, driver, dsn, dbLog)
         if err != nil { return Throw(env, err) }
-    }
-    var logMu sync.Mutex
-    makeLogger := func(module, level string) waLog.Logger {
-        if level == "" { return nil }
-        if logFile != nil {
-            return &fileLogger{module: module, minLevel: level, mu: &logMu, w: logFile}
+
+        result := map[string]any{}
+
+        result["GetFirstDevice"] = func() any {
+            dev, err := container.GetFirstDevice(ctx)
+            if err != nil { return Throw(env, err) }
+            h := newHandle()
+            deviceMap.Store(h, dev)
+            return h
         }
-        return waLog.Stdout(module, level, config.Logger.Color)
-    }
 
-    dbLog := makeLogger("Database", config.Logger.Database)
-    
-    if config.DbPath == "" { config.DbPath = "mywagua.db" }
-    container, err := sqlstore.New(ctx, "sqlite3", "file:"+config.DbPath+"?_foreign_keys=on", dbLog)
-    if err != nil { return Throw(env,err) }
-
-    deviceStore, err := container.GetFirstDevice(ctx)
-    if err != nil { return Throw(env,err) }
-
-    clientLog := makeLogger("Client", config.Logger.Client)
-    client := whatsmeow.NewClient(deviceStore, clientLog)
-
-    var (
-        queue []string
-        mu sync.Mutex
-    )
-    client.AddEventHandler(func(evt interface {}) {
-        mu.Lock()
-        defer mu.Unlock()
-        au := map[string]interface{}{
-            "type": fmt.Sprintf("%T", evt),
-            "evt": evt,
+        result["GetAllDevices"] = func() any {
+            devs, err := container.GetAllDevices(ctx)
+            if err != nil { return Throw(env, err) }
+            handles := make([]string, len(devs))
+            for i, dev := range devs {
+                h := newHandle()
+                deviceMap.Store(h, dev)
+                handles[i] = h
+            }
+            return handles
         }
-        queue = append(queue, ToJson(au))
-    })
 
-    vm := goja.New()
-    vm.Set("ctx", ctx)
-    vm.Set("client", client)
-    conn := Sends(env, client)
-    p := conn["_params"].(map[string]string)
-    conn["run"] = func(value string) any {
-        result, err :=  vm.RunString(value)
-        if err != nil { return Throw(env,err) }
-        return fmt.Sprintf("%s",result)
-    }
-    conn["getEvt"] = func()[]string{
-        mu.Lock()
-        defer mu.Unlock()
-        if len(queue) == 0 {
+        result["GetDevice"] = func(jid string) any {
+            j, err := types.ParseJID(jid)
+            if err != nil { return Throw(env, err) }
+            dev, err := container.GetDevice(ctx, j)
+            if err != nil { return Throw(env, err) }
+            if dev == nil { return nil }
+            h := newHandle()
+            deviceMap.Store(h, dev)
+            return h
+        }
+
+        result["PutDevice"] = func() any {
+            dev := container.NewDevice()
+            h := newHandle()
+            deviceMap.Store(h, dev)
+            return h
+        }
+
+        result["DeleteDevice"] = func(handle string) any {
+            v, ok := deviceMap.Load(handle)
+            if !ok { return Throw(env, fmt.Errorf("device not found: %s", handle)) }
+            dev := v.(*store.Device)
+            if err := container.DeleteDevice(ctx, dev); err != nil { return Throw(env, err) }
+            deviceMap.Delete(handle)
             return nil
         }
-        result := make([]string, len(queue))
-        copy(result, queue)
-        queue = queue[:0]
+
         return result
-    }
-    push := func(v any) {
-        mu.Lock()
-        defer mu.Unlock()
-        queue = append(queue, ToJson(v))
-    }
-    caller := meowcaller.NewClient(client)
-    SetupCaller(env, caller, push, conn, p)
-    return conn
-})
-export.Set("create", sock)
+    })
+
+    clientFn, _ := napi.GoFuncOf(env, func(deviceHandle string, cfg any) any {
+        v, ok := deviceMap.Load(deviceHandle)
+        if !ok { return Throw(env, fmt.Errorf("device not found: %s", deviceHandle)) }
+        deviceStore := v.(*store.Device)
+
+        var config struct {
+            Logger struct {
+                Client string
+                Color  bool
+                File   string
+            }
+            OsName string
+        }
+        if err := json.Unmarshal([]byte(ToJson(cfg)), &config); err != nil { return Throw(env, err) }
+
+        store.DeviceProps.PlatformType = waCompanionReg.DeviceProps_CHROME.Enum()
+        if config.OsName == "" { config.OsName = "Chrome" }
+        store.DeviceProps.Os = proto.String(config.OsName)
+
+        clientLog := makeLogger("Client", config.Logger.Client, config.Logger.File, config.Logger.Color)
+        client := whatsmeow.NewClient(deviceStore, clientLog)
+
+        var (
+            queue []string
+            mu    sync.Mutex
+        )
+        client.AddEventHandler(func(evt interface{}) {
+            mu.Lock()
+            defer mu.Unlock()
+            queue = append(queue, ToJson(map[string]interface{}{
+                "type": fmt.Sprintf("%T", evt),
+                "evt":  evt,
+            }))
+        })
+
+        vm := goja.New()
+        vm.Set("ctx", ctx)
+        vm.Set("client", client)
+        conn := Sends(env, client)
+        p := conn["_params"].(map[string]string)
+        conn["run"] = func(value string) any {
+            result, err := vm.RunString(value)
+            if err != nil { return Throw(env, err) }
+            return fmt.Sprintf("%s", result)
+        }
+        conn["getEvt"] = func() []string {
+            mu.Lock()
+            defer mu.Unlock()
+            if len(queue) == 0 { return nil }
+            result := make([]string, len(queue))
+            copy(result, queue)
+            queue = queue[:0]
+            return result
+        }
+        push := func(v any) {
+            mu.Lock()
+            defer mu.Unlock()
+            queue = append(queue, ToJson(v))
+        }
+        caller := meowcaller.NewClient(client)
+        SetupCaller(env, caller, push, conn, p)
+        return conn
+    })
+
+    export.Set("Container", containerFn)
+    export.Set("Client", clientFn)
 }
 
 func main() {}
