@@ -92,24 +92,26 @@ func RegisterNapi(env napi.EnvType, export *napi.Object) {
 
         result := map[string]any{}
 
+        devInfo := func(dev *store.Device) map[string]any {
+            h := newHandle()
+            deviceMap.Store(h, dev)
+            jid := ""
+            if dev.ID != nil { jid = dev.ID.String() }
+            return map[string]any{"handle": h, "jid": jid}
+        }
+
         result["GetFirstDevice"] = func() any {
             dev, err := container.GetFirstDevice(ctx)
             if err != nil { return Throw(env, err) }
-            h := newHandle()
-            deviceMap.Store(h, dev)
-            return h
+            return devInfo(dev)
         }
 
         result["GetAllDevices"] = func() any {
             devs, err := container.GetAllDevices(ctx)
             if err != nil { return Throw(env, err) }
-            handles := make([]string, len(devs))
-            for i, dev := range devs {
-                h := newHandle()
-                deviceMap.Store(h, dev)
-                handles[i] = h
-            }
-            return handles
+            infos := make([]map[string]any, len(devs))
+            for i, dev := range devs { infos[i] = devInfo(dev) }
+            return infos
         }
 
         result["GetDevice"] = func(jid string) any {
@@ -118,16 +120,12 @@ func RegisterNapi(env napi.EnvType, export *napi.Object) {
             dev, err := container.GetDevice(ctx, j)
             if err != nil { return Throw(env, err) }
             if dev == nil { return nil }
-            h := newHandle()
-            deviceMap.Store(h, dev)
-            return h
+            return devInfo(dev)
         }
 
         result["PutDevice"] = func() any {
             dev := container.NewDevice()
-            h := newHandle()
-            deviceMap.Store(h, dev)
-            return h
+            return devInfo(dev)
         }
 
         result["DeleteDevice"] = func(handle string) any {

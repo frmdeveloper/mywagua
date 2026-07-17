@@ -15,7 +15,7 @@ Njir jadi gini ceritanya wkwk — whatsmeow (Go) tapi bisa dipake dari Node.js l
 
 - Node.js 20+
 - Go 1.21+
-- ffmpeg (opsional, buat konvert video ke audio pas voice call — hadeh ribet amat)
+- ffmpeg (opsional, buat konvert video ke audio pas voice call)
 
 ## Install
 
@@ -23,7 +23,9 @@ Njir jadi gini ceritanya wkwk — whatsmeow (Go) tapi bisa dipake dari Node.js l
 npm install mywagua@github:frmdeveloper/mywagua
 ```
 
-## Paling gampang njir parah
+---
+
+## Flow Konek
 
 ```js
 import { Container, makeClient } from "mywagua"
@@ -32,17 +34,17 @@ const db     = Container("sqlite3", "file:bot.db?_foreign_keys=on", "INFO")
 const device = db.GetFirstDevice()
 const conn   = makeClient(device, { Logger: { Client: "INFO" } })
 
-if (!conn.Store().ID) {
-    conn.Connect()
-    console.log(await conn.PairPhone("62xxx"))
-} else {
-    conn.Connect()
-}
+conn.Connect()
 
 conn.Event(async ({ type, evt }) => {
-    if (type !== "*events.Message") return
-    const m = await conn.simple(evt)
-    console.log(m.sender, m.text)
+    if (type === "*events.Connected") {
+        console.log("Connected njir!")
+    }
+
+    if (type === "*events.Message") {
+        const m = await conn.simple(evt)
+        console.log(m.sender, m.text)
+    }
 })
 ```
 
@@ -52,7 +54,7 @@ conn.Event(async ({ type, evt }) => {
 
 ### Container
 
-Basically `sqlstore.New`-nya whatsmeow tapi versi JS. Njir gampang banget.
+Basically `sqlstore.New`-nya whatsmeow tapi versi JS njir.
 
 ```js
 const db = Container(driver, dsn, logLevel)
@@ -78,6 +80,13 @@ db.PutDevice()
 db.DeleteDevice(handle)
 ```
 
+Semua device method return object `{handle, dbPath, jid}`:
+
+```js
+const device = db.GetFirstDevice()
+// { handle: '1', dbPath: 'bot.db', jid: '6281234567890:4@s.whatsapp.net' }
+```
+
 ---
 
 ### makeClient(device, config)
@@ -85,18 +94,8 @@ db.DeleteDevice(handle)
 ```js
 const conn = makeClient(device, {
     Logger: { Client: "INFO" },
-    OsName: "NamaBotLo"
+    OsName: "Chrome"
 })
-```
-
-### makeWASocket(config)
-
-Shorthand buat yang males njir wkwk langsung gas aja dah.
-
-```js
-import { makeWASocket } from "mywagua"
-
-const conn = makeWASocket({ Logger: { Client: "INFO" } })
 ```
 
 ---
@@ -107,10 +106,12 @@ const conn = makeWASocket({ Logger: { Client: "INFO" } })
 const db = Container("pgx", "postgres://user:pass@localhost/db")
 
 const devices = db.GetAllDevices()
+// [{ handle: '1', jid: '628xx...' }, { handle: '2', jid: '628yy...' }]
 
-const bot1 = makeClient(devices[0], { OsName: "Bot 1" })
-const bot2 = makeClient(devices[1], { OsName: "Bot 2" })
-const bot3 = makeClient(devices[2], { OsName: "Bot 3" })
+const bot1 = makeClient(devices[0], { OsName: "Chrome" })
+const bot2 = makeClient(devices[1], { OsName: "Chrome" })
+
+const botA = makeClient(devices.find(d => d.jid.startsWith("62851")), config)
 ```
 
 ---
@@ -135,9 +136,7 @@ conn.Store()
 
 ```js
 const stop = conn.Event(async ({ type, evt }) => {
-    if (type === "*events.Message") {
-        const m = await conn.simple(evt)
-    }
+    // ...
 })
 
 stop()
@@ -148,9 +147,10 @@ stop()
 | `*events.Message` | Ada pesan masuk njir wkwk |
 | `*events.Receipt` | Read/delivery receipt |
 | `*events.Presence` | Online/offline |
-| `*events.ChatPresence` | Lagi ngetik/rekam, hadeh |
+| `*events.ChatPresence` | Lagi ngetik/rekam hadeh |
 | `*events.Connected` | Nyambung njir finally |
 | `*events.Disconnected` | Putus njir hadeh |
+| `*events.LoggedOut` | Kena banned/logout |
 | `*events.CallOffer` | Ada telpon masuk |
 | `meowcaller.IncomingCall` | Telpon masuk (meowcaller) |
 | `meowcaller.CallReady` | Media call aktif |
@@ -268,7 +268,7 @@ conn.NewsletterSubscribeLiveUpdates(jid)
 
 ---
 
-## Voice Call, njir kocak
+## Voice Call
 
 Pake [meowcaller](https://github.com/purpshell/meowcaller) di baliknya njir nama library-nya aja udah kocak parah wkwk.
 
@@ -282,11 +282,6 @@ conn.Event(async ({ type, evt }) => {
     if (type === "meowcaller.CallReady") {
         conn.playAudio(evt.callId, "audio.mp3")
         conn.receiveAudio(evt.callId, "rekaman.wav")
-        conn.receivePCM(evt.callId)
-    }
-
-    if (type === "meowcaller.AudioFrame") {
-        const pcm = evt.pcm
     }
 
     if (type === "meowcaller.CallEnd") {
@@ -297,17 +292,15 @@ conn.Event(async ({ type, evt }) => {
 const callId = await conn.placeCall("+6281234567890")
 conn.hangupCall(callId)
 conn.rejectCall(callId, callerJID)
-
 conn.playAudio(callId, "audio.mp3")
 conn.playAudio(callId, "video.mp4")
-
 conn.receiveAudio(callId, "rekaman.wav")
 conn.receivePCM(callId)
 ```
 
-Format audio: `.mp3` `.ogg` `.opus` `.wav` — file video (`.mp4` `.mkv` `.avi` dll) langsung dikonvert otomatis ke mp3 via ffmpeg njir gak perlu ribet konvert manual. Wkwk serius dah.
+Format audio: `.mp3` `.ogg` `.opus` `.wav` — file video (`.mp4` `.mkv` `.avi` dll) langsung dikonvert otomatis ke mp3 via ffmpeg njir gak perlu ribet konvert manual wkwk serius dah.
 
-> ⚠️ Video call (`playVideo`) belum divalidasi meowcaller. Hadeh, jangan ngarep bisa jalan mulus.
+> ⚠️ Video call (`playVideo`) belum divalidasi meowcaller hadeh jangan ngarep bisa jalan mulus.
 
 ---
 

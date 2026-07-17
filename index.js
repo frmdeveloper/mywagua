@@ -11,7 +11,11 @@ export function Container(driver = "", dsn = "", logLevel = "") {
         ? (dsn || "file:mywagua.db").replace(/^file:/, "").split("?")[0]
         : null
 
-    const wrap = (handle) => ({ handle, dbPath })
+    const wrap = (item) => {
+        const handle = typeof item === "string" ? item : item.handle
+        const jid    = typeof item === "string" ? undefined : item.jid
+        return { handle, dbPath, jid }
+    }
 
     const orig = {
         GetFirstDevice:  container.GetFirstDevice.bind(container),
@@ -32,12 +36,6 @@ export function makeClient(device, config = {}) {
     const handle = typeof device === "string" ? device : device.handle
     const go = addon.Client(handle, config)
     return mappingSock(go)
-}
-
-export function makeWASocket(config = {}) {
-    const container = Container("", "", "")
-    const device = container.GetFirstDevice()
-    return makeClient(device, config)
 }
 
 function mappingSock(go) {
@@ -65,6 +63,7 @@ for (const [key, val] of Object.entries(go)) {
 }
 
 const sock = {
+    whatsmeow: true,
     ...mapped, ...wrappedGo, simple:swmeow,
     Event(callback) {
         return setInterval(() => {
@@ -104,3 +103,4 @@ function binder(target, fill) {
     }
     return binded
 }
+
