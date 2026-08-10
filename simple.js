@@ -10,8 +10,10 @@ export const swmeow = async(conn, m) => {
                     m.Info.Chat?.replace(/:[0-9]+/,"")
         msg.fromMe = m.Info.IsFromMe
         msg.isGroup = m.Info.IsGroup
+        msg.lid = m.Info.Sender?.replace(/:[0-9]+/, '') || ''
         msg.sender = m.Info.SenderAlt?.replace(/:[0-9]+/,"") || m.Info.Sender?.replace(/:[0-9]+/,"")
         msg.pushname = m.Info.PushName
+        msg.key = { remoteJid: msg.from, id: msg.id, fromMe: msg.fromMe, ...(msg.isGroup ? { participant: msg.sender } : {}) }
     }
     if (m.RawMessage) {
         m.message = m.RawMessage
@@ -45,7 +47,7 @@ export const swmeow = async(conn, m) => {
         msg.quoted.id = msg.msg.contextInfo.stanzaID
         msg.quoted.sender = msg.msg.contextInfo.participant.replace(/:[0-9]+/,"")
         msg.quoted.fromMe = msg.quoted.sender.replace(/:[0-9]+/,"") == conn.Store().ID
-        //msg.quoted.key = {remoteJid: msg.quoted.from, id: msg.quoted.id, fromMe: msg.quoted.fromMe, participant: msg.quoted.sender}
+        msg.quoted.key = { remoteJid: msg.quoted.from, id: msg.quoted.id, fromMe: msg.quoted.fromMe, participant: msg.quoted.sender }
         msg.quoted.text = isi?.caption || isi?.text || isi?.message?.documentMessage?.caption || isi || ""
         msg.quoted.mentionedJid = quoted[type]?.contextInfo?.mentionedJID
         msg.quoted.groupMentions = quoted[type]?.contextInfo?.groupMentions

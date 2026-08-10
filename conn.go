@@ -425,7 +425,7 @@ conn["SubscribePresence"] = func(jid string) any {
 }; p["SubscribePresence"] = "jid"
 
 conn["SetStatusMessage"] = func(msg string) any {
-    if err := Cli.SetStatusMessage(ctx, msg); err != nil { return Throw(env, err) }
+    if err := Cli.SetStatusMessage(ctx, types.SetStatusInput{Text: &msg}); err != nil { return Throw(env, err) }
     return nil
 }; p["SetStatusMessage"] = "msg"
 

@@ -17,6 +17,12 @@ export function Container(driver = "", dsn = "", logLevel = "") {
         return { handle, dbPath, jid }
     }
 
+    const origDelete = container.DeleteDevice.bind(container)
+    container.DeleteDevice = (device) => {
+        const handle = typeof device === "string" ? device : device.handle
+        return origDelete(handle)
+    }
+
     const orig = {
         GetFirstDevice:  container.GetFirstDevice.bind(container),
         GetAllDevices:   container.GetAllDevices.bind(container),

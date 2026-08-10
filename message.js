@@ -60,9 +60,18 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         message = { conversation:content.text }
     }
     if ("delete" in content) {
-        message = { protocolMessage:{ key:content.delete.key, type:0 } }
+        message = { protocolMessage:{ key:content.delete.key ?? content.delete, type:0 } }
+    }
+    if ("edit" in content) {
+        const editedMessage = content.text
+            ? { conversation: content.text }
+            : message
+        message = { protocolMessage:{ key:content.edit.key ?? content.edit, type:14, editedMessage } }
     }
     return message
+}
+export async function editMessage(jid, key, newContent = {}, options = {}) {
+    return sendMessage.call(this, jid, { edit: key, ...newContent }, options)
 }
 export function getContentType(content) {
     if (content) {
