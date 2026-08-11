@@ -14,10 +14,8 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/beeper/argo-go v1.1.2 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/dlclark/regexp2/v2 v2.6.0 // indirect
-	github.com/elliotchance/orderedmap/v3 v3.1.1 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -35,9 +33,8 @@ require (
 	github.com/pion/randutil v0.1.0 // indirect
 	github.com/pion/sctp v1.11.1 // indirect
 	github.com/pion/transport/v4 v4.1.0 // indirect
+	github.com/polymorfa/libsignal-protocol-go v0.2.3-0.20260806162910-a2adef2e8a11 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.36 // indirect
-	go.mau.fi/libsignal v0.2.2 // indirect
 	go.mau.fi/util v0.9.12-0.20260717235539-f9ffa7eca58d // indirect
 	golang.org/x/crypto v0.54.0 // indirect
 	golang.org/x/exp v0.0.0-20260727155853-b88d891fe743 // indirect
@@ -48,3 +45,5 @@ require (
 )
 
 replace sirherobrine23.com.br/Sirherobrine23/napi-go => ./napi-go
+
+replace go.mau.fi/whatsmeow => github.com/polymorfa/hypermeow v0.0.0-20260810223731-174c26a7db2f
