@@ -1,5 +1,6 @@
 import { writeFileSync, existsSync, rmSync } from "fs"
 import {randomBytes} from "crypto"
+import {generateThumbnail} from "./thumbnail.js"
 
 export async function sendMessage(jid, content = {}, options = {}) {
     const message = await generateWAMessageFromContent.bind(this)(jid, content, options)
@@ -33,9 +34,27 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         if ("base64" in content[mediatype]) mediacontent = { Base64: content[mediatype].base64 }
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
         if (!mediacontent) throw new Error("Media not found")
-        const upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
-        if (rand) rmSync("assets/"+rand)
+        const thumb = /^(image|video)$/.test(mediatype) ? await generateThumbnail(mediatype, mediacontent) : null
+        // The thumbnail already pulled the remote media, so upload that copy instead of
+        // letting the URL be fetched a second time. Base64 stays under the same 5MB rule
+        // as the buffer branch above; a video is handed over as a file either way.
+        if (thumb?.file) mediacontent = { File: thumb.file }
+        else if (thumb?.bytes && mediacontent.Url && thumb.bytes.length <= 5242880) {
+            mediacontent = { Base64: thumb.bytes.toString("base64") }
+        }
+        let upload
+        try {
+            upload = this.Upload(mediacontent, "WhatsApp "+types+" Keys")
+        } finally {
+            if (rand) rmSync("assets/"+rand)
+            if (thumb?.file) rmSync(thumb.file, { force: true })
+        }
         message[mediatype+"Message"] = upload
+        if (thumb) {
+            message[mediatype+"Message"].JPEGThumbnail = thumb.JPEGThumbnail
+            message[mediatype+"Message"].width = thumb.width
+            message[mediatype+"Message"].height = thumb.height
+        }
         if (mediatype == "audio") message[mediatype+"Message"].mimetype = "audio/mpeg"
         if (mediatype == "image") message[mediatype+"Message"].mimetype = "image/jpeg"
         if (mediatype == "video") message[mediatype+"Message"].mimetype = "video/mp4"
