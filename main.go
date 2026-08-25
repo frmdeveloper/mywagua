@@ -161,6 +161,9 @@ func RegisterNapi(env napi.EnvType, export *napi.Object) {
 
         clientLog := makeLogger("Client", config.Logger.Client, config.Logger.File, config.Logger.Color)
         client := whatsmeow.NewClient(deviceStore, clientLog)
+        // pesan pertama dari pengirim yang belum ada sesi/sender key gagal didekripsi;
+        // retry receipt ke pengirim sering nggak nyampe, jadi minta plaintext-nya ke hp utama
+        client.AutomaticMessageRerequestFromPhone = true
 
         var (
             queue []string

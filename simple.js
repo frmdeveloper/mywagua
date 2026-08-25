@@ -5,9 +5,10 @@ export const swmeow = async(conn, m) => {
     msg.full = m
     if (m.Info) {
         msg.id = m.Info.ID
-        msg.from = m.Info.Chat.endsWith("@lid") ? 
-                    (m.Info.SenderAlt?.replace(/:[0-9]+/,"") || m.Info.RecipientAlt?.replace(/:[0-9]+/,"")) :
-                    m.Info.Chat?.replace(/:[0-9]+/,"")
+        // chat @lid tanpa atribut sender_pn/peer_recipient_pn: balik ke lid-nya, jangan kosong
+        msg.from = (m.Info.Chat?.endsWith("@lid") ?
+                    (m.Info.SenderAlt || m.Info.RecipientAlt || m.Info.Chat) :
+                    m.Info.Chat)?.replace(/:[0-9]+/,"")
         msg.fromMe = m.Info.IsFromMe
         msg.isGroup = m.Info.IsGroup
         msg.lid = m.Info.Sender?.replace(/:[0-9]+/, '') || ''
