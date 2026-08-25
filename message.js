@@ -35,9 +35,6 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         const types = isSticker ? "Image" : mediatype.replace(/^./, ma => ma.toUpperCase())
         if (!mediacontent) throw new Error("Media not found")
         const thumb = /^(image|video)$/.test(mediatype) ? await generateThumbnail(mediatype, mediacontent) : null
-        // The thumbnail already pulled the remote media, so upload that copy instead of
-        // letting the URL be fetched a second time. Base64 stays under the same 5MB rule
-        // as the buffer branch above; a video is handed over as a file either way.
         if (thumb?.file) mediacontent = { File: thumb.file }
         else if (thumb?.bytes && mediacontent.Url && thumb.bytes.length <= 5242880) {
             mediacontent = { Base64: thumb.bytes.toString("base64") }

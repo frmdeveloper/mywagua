@@ -5,7 +5,6 @@ export const swmeow = async(conn, m) => {
     msg.full = m
     if (m.Info) {
         msg.id = m.Info.ID
-        // chat @lid tanpa atribut sender_pn/peer_recipient_pn: balik ke lid-nya, jangan kosong
         msg.from = (m.Info.Chat?.endsWith("@lid") ?
                     (m.Info.SenderAlt || m.Info.RecipientAlt || m.Info.Chat) :
                     m.Info.Chat)?.replace(/:[0-9]+/,"")
@@ -18,8 +17,6 @@ export const swmeow = async(conn, m) => {
     }
     if (m.RawMessage) {
         m.message = m.RawMessage
-        //if (m?.message?.messageContextInfo) delete m.message.messageContextInfo
-        //if (m?.message?.senderKeyDistributionMessage) delete m.message.senderKeyDistributionMessage
         m.message = m.message.viewOnceMessageV2?.message ||
             m.message.documentWithCaptionMessage?.message ||
             m.message.editedMessage?.message?.protocolMessage?.editedMessage ||
