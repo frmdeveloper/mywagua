@@ -74,7 +74,10 @@ const sock = {
     Event(callback) {
         return setInterval(() => {
             const evts = go.getEvt()
-            if (evts) evts.forEach(i => callback(JSON.parse(i)))
+            if (evts) evts.forEach(i => {
+                const evt = JSON.parse(i)
+                if (adaIsi(evt)) callback(evt)
+            })
         }, 100)
     },
     Call(name, ...arg) {
@@ -98,6 +101,18 @@ const sock = {
 }
 
 return {...sock, ...binder(message, go)}
+}
+
+function adaIsi({type, evt}) {
+    if (type !== "*events.Message") return true
+    let raw = evt?.RawMessage
+    if (!raw) return true
+    raw = raw.viewOnceMessageV2?.message ||
+        raw.documentWithCaptionMessage?.message ||
+        raw.editedMessage?.message?.protocolMessage?.editedMessage ||
+        raw.deviceSentMessage?.message ||
+        raw
+    return !!message.getContentType(raw)
 }
 
 function binder(target, fill) {
