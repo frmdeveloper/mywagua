@@ -66,6 +66,14 @@ export async function generateWAMessageFromContent(jid, content = {}, options = 
         message[key].contextInfo = message[key].contextInfo || {}
         message[key].contextInfo.mentionedJID = content.mentions
     }
+    if (content.parseMention) {
+        const teks = [content.text, content.caption].filter(a => typeof a === "string").join(" ")
+        message[key].contextInfo = message[key].contextInfo || {}
+        message[key].contextInfo.mentionedJID = [...new Set([
+            ...(message[key].contextInfo.mentionedJID || []),
+            ...this.ParseMention(teks),
+        ])]
+    }
     if (options.quoted) {
         message[key].contextInfo = message[key].contextInfo || {}
         message[key].contextInfo.stanzaID = options.quoted.Info.ID

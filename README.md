@@ -367,6 +367,12 @@ await conn.sendMessage(jid, {
     mentions: ["628123456789@s.whatsapp.net"]
 })
 
+// males nulis mentions manual? pake parseMention, dia baca sendiri dari teksnya
+await conn.sendMessage(jid, {
+    text: "Woy @628123456789 sama @123456789012345@lid sini bre",
+    parseMention: true
+})
+
 // bales pesan — passing event MENTAHNYA njir, bukan hasil simple()
 await conn.sendMessage(jid, { text: "Nih balesannya" }, { quoted: evt })
 ```

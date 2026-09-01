@@ -329,12 +329,7 @@ conn["UpdateGroupParticipants"] = func(jid string, participantChanges any, actio
 }; p["UpdateGroupParticipants"] = "jid, participants, action"
 
 conn["ParseMention"] = func(text string) []string {
-    res := []string{}
-    matches := regexp.MustCompile("@([0-9]{5,16}|0)").FindAllStringSubmatch(text, -1)
-    for _, match := range matches {
-        res = append(res, match[1]+"@s.whatsapp.net")
-    }
-    return res
+    return parseMention(text)
 }; p["ParseMention"] = "text"
 
 conn["relayMessage"] = func(jid string, message any, a any) any {
@@ -819,13 +814,28 @@ func (c *Conn) GenerateMessageID() types.MessageID {
     }
     return strings.ToUpper(hex.EncodeToString(id)) + "-FRM"
 }
-func (c *Conn) ParseMention(text string) []string {
+var polaMention = regexp.MustCompile(`@([0-9]{5,20}|0)(?:@(s\.whatsapp\.net|lid|c\.us))?`)
+
+func parseMention(text string) []string {
     res := []string{}
-    matches := regexp.MustCompile("@([0-9]{5,16}|0)").FindAllStringSubmatch(text, -1)
-    for _, match := range matches {
-        res = append(res, match[1]+"@s.whatsapp.net")
+    sudah := map[string]bool{}
+    for _, match := range polaMention.FindAllStringSubmatch(text, -1) {
+        server := "s.whatsapp.net"
+        if match[2] == "lid" {
+            server = "lid"
+        }
+        jid := match[1] + "@" + server
+        if sudah[jid] {
+            continue
+        }
+        sudah[jid] = true
+        res = append(res, jid)
     }
     return res
+}
+
+func (c *Conn) ParseMention(text string) []string {
+    return parseMention(text)
 }
 func (c *Conn) WaUpload(args L, tipeM whatsmeow.MediaType, newsletter bool) (J, error) {
     dow, err := GetByte(args)
