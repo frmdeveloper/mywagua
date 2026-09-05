@@ -812,7 +812,7 @@ func (c *Conn) GenerateMessageID() types.MessageID {
     if err != nil {
         panic(err)
     }
-    return strings.ToUpper(hex.EncodeToString(id)) + "-FRM"
+    return strings.ToUpper(hex.EncodeToString(id)) + "0FRM"
 }
 var polaMention = regexp.MustCompile(`@([0-9]{5,20}|0)(?:@(s\.whatsapp\.net|lid|c\.us))?`)
 
