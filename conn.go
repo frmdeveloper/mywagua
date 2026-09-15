@@ -7,9 +7,9 @@ import (
     "encoding/json"
     "fmt"
     "google.golang.org/protobuf/proto"
-    "go.mau.fi/whatsmeow"
-    "go.mau.fi/whatsmeow/types"
-    "go.mau.fi/whatsmeow/types/events"
+    "github.com/polymorfa/hypermeow"
+    "github.com/polymorfa/hypermeow/types"
+    "github.com/polymorfa/hypermeow/types/events"
     "io/ioutil"
     "net/http"
     "os"
@@ -20,7 +20,7 @@ import (
     "sync"
     "time"
     "sirherobrine23.com.br/Sirherobrine23/napi-go"
-    waProto "go.mau.fi/whatsmeow/binary/proto"
+    waProto "github.com/polymorfa/hypermeow/binary/proto"
     meowcaller "github.com/purpshell/meowcaller"
 )
 
