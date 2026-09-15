@@ -5,7 +5,7 @@
 
 ### *Whatsmeow tapi Node.js, njir parah*
 
-<sub>`whatsmeow` (Go) → N-API → JavaScript · sqlite / postgres · voice call · goja escape hatch</sub>
+<sub>[hypermeow](https://github.com/polymorfa/hypermeow) (fork whatsmeow, Go) → N-API → JavaScript · sqlite / postgres · voice call · escape hatch</sub>
 
 </div>
 
@@ -16,9 +16,10 @@
 [whatsmeow](https://github.com/tulir/whatsmeow) itu library WhatsApp paling waras yang pernah ada.
 Masalahnya? **Dia Go.** Sementara isi dunia bot WA tuh Node.js semua. Hadeh, kocak parah.
 
-Mau rewrite protokolnya sendiri? Kagak sanggup gua wkwk. Jadi ya udah, whatsmeow-nya gua bungkus
-jadi **native Node addon** lewat N-API. Hasilnya lu nulis JavaScript santuy, tapi yang capek-capek
-ngurus enkripsi Signal, websocket, retry, upload media — Go semua. Enak kan njir.
+Mau rewrite protokolnya sendiri? Kagak sanggup gua wkwk. Jadi ya udah, whatsmeow-nya (lewat fork
+[hypermeow](https://github.com/polymorfa/hypermeow)) gua bungkus jadi **native Node addon** lewat
+N-API. Hasilnya lu nulis JavaScript santuy, tapi yang capek-capek ngurus enkripsi Signal, websocket,
+retry, upload media — Go semua. Enak kan njir.
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -27,7 +28,7 @@ ngurus enkripsi Signal, websocket, retry, upload media — Go semua. Enak kan nj
 ├──────────────────────────────────────────────────┤
 │  main.node   ← jembatan N-API (napi-go)          │
 ├──────────────────────────────────────────────────┤
-│  whatsmeow · meowcaller · goja  (Go, yang capek) │
+│  whatsmeow (hypermeow) · meowcaller              │
 ├──────────────────────────────────────────────────┤
 │  sqlite3  /  postgres (pgx)                      │
 └──────────────────────────────────────────────────┘
@@ -41,7 +42,7 @@ ngurus enkripsi Signal, websocket, retry, upload media — Go semua. Enak kan nj
 | 🔀 **Multi-akun** | Satu proses, satu database, bot sebanyak yang lu mau. `GetAllDevices()` udah kelar. |
 | 📞 **Voice call** | Beneran bisa nerima/nelpon + muter audio, pake [meowcaller](https://github.com/purpshell/meowcaller). |
 | 🖼️ **Thumbnail otomatis** | Foto & video digenerate thumbnail-nya sendiri, lu gak usah mikir. |
-| 🚪 **Ada pintu darurat** | Method whatsmeow belum dibungkus? Sikat langsung lewat `conn.run()` njir. |
+| 🚪 **Ada pintu darurat** | Method whatsmeow/hypermeow belum dibungkus? Sikat langsung lewat `conn.run()` njir. |
 | 🗄️ **SQLite / Postgres** | Sesi disimpen di DB. Bukan folder JSON yang dikit-dikit korup terus hadeh. |
 
 ---
@@ -66,7 +67,7 @@ npm install mywagua@github:frmdeveloper/mywagua
 ```
 
 `postinstall` bakal jalanin `go get -u && go build -buildmode=c-shared -o main.node .` — jadi install
-pertama emang lama njir sabar dulu, dia compile whatsmeow dari nol. Ngopi aja dulu.
+pertama emang lama njir sabar dulu, dia compile whatsmeow (hypermeow) dari nol. Ngopi aja dulu.
 
 Mau build ulang manual:
 
@@ -79,7 +80,7 @@ npm run build
 
 - `go: command not found` → Go-nya belum keinstall, atau gak masuk `PATH` njir.
 - `gcc failed` → butuh C toolchain. `build-essential` di Debian, `clang` di Termux.
-- `main.node` gede banget ~50MB → **normal njir santuy**, itu whatsmeow + sqlite + goja
+- `main.node` gede banget ~50MB → **normal njir santuy**, itu whatsmeow + sqlite
   distatic-link jadi satu.
 
 </details>
@@ -134,7 +135,7 @@ Udah. Segitu doang buat bot yang bisa bales njir wkwk.
 
 ## Container — tempat nyimpen sesi
 
-Ini `sqlstore.New`-nya whatsmeow, tapi versi JS biar lu gak pusing.
+Ini `sqlstore.New`-nya whatsmeow, tapi versi JS biar lu gak pusing. Sama aja kyk di [hypermeow](https://github.com/polymorfa/hypermeow) njir.
 
 ```js
 Container(driver?, dsn?, logLevel?)
@@ -265,7 +266,7 @@ Jadi callback lu **gak pernah** dipanggil dari thread Go — aman njir, zero rac
 Pesan kosongan (protocol message, sender-key doang, dll) otomatis di-skip biar handler lu gak
 kebanjiran sampah wkwk.
 
-### Event whatsmeow
+### Event whatsmeow (hypermeow)
 
 | Type | Kapan nongol |
 |---|---|
@@ -284,7 +285,7 @@ kebanjiran sampah wkwk.
 | `*events.Contact` / `*events.PushName` | Kontak keupdate |
 
 Semua tipe event whatsmeow lewat sini njir, `type`-nya persis nama Go-nya
-(soalnya diambil dari `fmt.Sprintf("%T")` wkwk males mikir).
+(soalnya diambil dari `fmt.Sprintf("%T")` wkwk males mikir). Di hypermeow nama-namanya sama, jadi gak usah mikir dua kali.
 
 ### Event voice call
 
@@ -460,7 +461,7 @@ Yang lain-lain:
 conn.RevokeMessage(chat, sender, id)
 conn.BuildMessageKey(chat, sender, id)
 conn.BuildUnavailableMessageRequest(chat, sender, id)
-conn.GenerateMessageID()                 // formatnya: 28 hex uppercase + "-FRM"
+conn.GenerateMessageID()                 // formatnya: 28 hex uppercase + "0FRM"
 conn.DecryptPollVote(pollMsg, vote)
 conn.DecryptReaction(reactionMsg)
 conn.SendPeerMessage(message)
@@ -656,11 +657,11 @@ if (type === "meowcaller.AudioFrame") {
 
 ---
 
-## 🚪 Pintu darurat — sikat whatsmeow mentah
+## 🚪 Pintu darurat — sikat whatsmeow/hypermeow mentah
 
-Nah ini bagian paling gokil njir. Di dalem ada [goja](https://github.com/dop251/goja) (interpreter JS
-yang ditulis pake Go) dan dia udah dikasih variabel `client` (`*whatsmeow.Client`) plus `ctx`. Jadi
-**method whatsmeow APAPUN** bisa lu panggil, walaupun gua belum bungkus:
+Nah ini bagian paling gokil njir. Di sisi Go ada interpreter JS yang udah dikasih variabel `client`
+(`*whatsmeow.Client` dari hypermeow) plus `ctx`. Jadi **method whatsmeow/hypermeow APAPUN** bisa lu
+panggil, walaupun gua belum bungkus:
 
 ```js
 // eval JS langsung di sisi Go, gila kan wkwk
@@ -723,7 +724,7 @@ conn.MarkNotDirty(name, timestamp)
 
 ## Mau nyumbang kode?
 
-Nemu bug, atau ada method whatsmeow yang belum kebungkus? Buka issue atau langsung PR aja.
+Nemu bug, atau ada method whatsmeow/hypermeow yang belum kebungkus? Buka issue atau langsung PR aja.
 Polanya gampang, di `conn.go`:
 
 ```go
@@ -741,9 +742,9 @@ reg("NamaMethod", "param1, param2", func(param1 string, param2 bool) any {
 ## Makasih buat
 
 - [whatsmeow](https://github.com/tulir/whatsmeow) — yang ngurus protokol WhatsApp-nya
+- [hypermeow](https://github.com/polymorfa/hypermeow) — fork whatsmeow yang dipake di sini
 - [meowcaller](https://github.com/purpshell/meowcaller) — voice call
 - [napi-go](https://sirherobrine23.com.br/Sirherobrine23/napi-go) — jembatan N-API
-- [goja](https://github.com/dop251/goja) — JS runtime di Go
 - [jimp](https://github.com/jimp-dev/jimp) — thumbnail
 
 ---
