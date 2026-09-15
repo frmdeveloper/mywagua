@@ -358,7 +358,7 @@ conn["MarkRead"] = func(ids any, timestamp int64, chat string, sender string) an
 }; p["MarkRead"] = "ids, timestamp, chat, sender"
 
 conn["GenerateMessageID"] = func() any {
-    return Cli.GenerateMessageID()
+    return c.GenerateMessageID()
 }; p["GenerateMessageID"] = ""
 
 conn["RevokeMessage"] = func(chat string, sender string, id string) any {
