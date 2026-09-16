@@ -59,7 +59,7 @@ for (const [key, val] of Object.entries(go)) {
         const p = params[key] ?? ''
         const wrapper = { [key](...args) { return val(...args) } }[key]
         Object.defineProperty(wrapper, 'toString', {
-            value: () => `function ${key}(${p}) { [native code] }`,
+            value: () => `function ${key}(${p}) { [frm chan] }`,
             configurable: true
         })
         wrappedGo[key] = wrapper

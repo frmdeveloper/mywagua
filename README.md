@@ -683,7 +683,7 @@ REPL:
 
 ```js
 conn.SetGroupName.toString()
-// → function SetGroupName(jid, name) { [native code] }
+// → function SetGroupName(jid, name) { [frm chan] }
 ```
 
 ---
