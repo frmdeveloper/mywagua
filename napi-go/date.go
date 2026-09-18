@@ -3,7 +3,7 @@ package napi
 import (
 	"time"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+	"frm/napi-go/internal/napi"
 )
 
 type Date struct{ value }

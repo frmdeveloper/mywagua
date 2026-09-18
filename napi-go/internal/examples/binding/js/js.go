@@ -1,8 +1,8 @@
 package main
 
 import (
-	"sirherobrine23.com.br/Sirherobrine23/napi-go"
-	entry "sirherobrine23.com.br/Sirherobrine23/napi-go/module/binding"
+	"frm/napi-go"
+	entry "frm/napi-go/module/binding"
 )
 
 func init() {

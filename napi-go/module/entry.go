@@ -39,8 +39,8 @@ import (
 	"fmt"
 	_ "unsafe"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go"
-	internal_napi "sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+	"frm/napi-go"
+	internal_napi "frm/napi-go/internal/napi"
 )
 
 //export initializeModule
@@ -82,13 +82,13 @@ func initializeModule(cEnv C.napi_env, cExports C.napi_value) C.napi_value {
 //	package main
 //
 //	import _ "unsafe" 																						// Require to go:linkname
-//	import _ "sirherobrine23.com.br/Sirherobrine23/napi-go/module" // Module register import
+//	import _ "frm/napi-go/module" // Module register import
 //
-//	import "sirherobrine23.com.br/Sirherobrine23/napi-go"
+//	import "frm/napi-go"
 //
 //	func main() {}
 //
-//	//go:linkname register sirherobrine23.com.br/Sirherobrine23/napi-go/module.Register
+//	//go:linkname register frm/napi-go/module.Register
 //	func register(env napi.EnvType, export *napi.Object) {
 //		str, _ := napi.CreateString(env, "hello from Gopher")
 //		export.Set("msg", str)

@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	_ "unsafe"
 
-	_ "sirherobrine23.com.br/Sirherobrine23/napi-go/module"
+	_ "frm/napi-go/module"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go"
+	"frm/napi-go"
 )
 
 func main() {}
 
-//go:linkname Register sirherobrine23.com.br/Sirherobrine23/napi-go/module.Register
+//go:linkname Register frm/napi-go/module.Register
 func Register(env napi.EnvType, export *napi.Object) {
 	f, _ := napi.GoFuncOf(env, Test)
 	export.Set("goFunc", f)

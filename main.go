@@ -11,7 +11,7 @@ import (
     "github.com/polymorfa/hypermeow/proto/waCompanionReg"
     "google.golang.org/protobuf/proto"
     "github.com/dop251/goja"
-    "sirherobrine23.com.br/Sirherobrine23/napi-go"
+    "frm/napi-go"
     "io"
     "os"
     "strings"
@@ -21,7 +21,7 @@ import (
     waLog "github.com/polymorfa/hypermeow/util/log"
     meowcaller "github.com/purpshell/meowcaller"
     _ "unsafe"
-    _ "sirherobrine23.com.br/Sirherobrine23/napi-go/module"
+    _ "frm/napi-go/module"
     _ "github.com/mattn/go-sqlite3"
     _ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -78,7 +78,7 @@ func makeLogger(module, level, file string, color bool) waLog.Logger {
     return waLog.Stdout(module, level, color)
 }
 
-//go:linkname RegisterNapi sirherobrine23.com.br/Sirherobrine23/napi-go/module.Register
+//go:linkname RegisterNapi frm/napi-go/module.Register
 func RegisterNapi(env napi.EnvType, export *napi.Object) {
 
     containerFn, _ := napi.GoFuncOf(env, func(driver, dsn, logLevel string) any {

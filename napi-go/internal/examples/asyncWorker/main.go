@@ -5,14 +5,14 @@ import (
 	"time"
 	_ "unsafe"
 
-	_ "sirherobrine23.com.br/Sirherobrine23/napi-go/module"
+	_ "frm/napi-go/module"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go"
+	"frm/napi-go"
 )
 
 var waitTime = time.Second * 3
 
-//go:linkname Register sirherobrine23.com.br/Sirherobrine23/napi-go/module.Register
+//go:linkname Register frm/napi-go/module.Register
 func Register(env napi.EnvType, export *napi.Object) {
 	fn, _ := napi.CreateFunction(env, "", func(ci *napi.CallbackInfo) (napi.ValueType, error) {
 		var Test *napi.String

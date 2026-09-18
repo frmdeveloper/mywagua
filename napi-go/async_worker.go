@@ -3,7 +3,7 @@ package napi
 import (
 	"fmt"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+	"frm/napi-go/internal/napi"
 )
 
 // function to run code in background without locker Loop event

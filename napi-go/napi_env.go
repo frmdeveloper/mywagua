@@ -1,6 +1,6 @@
 package napi
 
-import "sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+import "frm/napi-go/internal/napi"
 
 // EnvType defines an interface for interacting with a NAPI environment.
 // It provides methods to retrieve the underlying NAPI environment, access the global object,

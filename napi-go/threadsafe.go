@@ -8,7 +8,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+	"frm/napi-go/internal/napi"
 )
 
 /*

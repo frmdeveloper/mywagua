@@ -1,6 +1,6 @@
 package napi
 
-import "sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+import "frm/napi-go/internal/napi"
 
 type NodeVersion = napi.NodeVersion
 

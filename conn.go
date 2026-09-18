@@ -19,7 +19,7 @@ import (
     "strings"
     "sync"
     "time"
-    "sirherobrine23.com.br/Sirherobrine23/napi-go"
+    "frm/napi-go"
     waProto "github.com/polymorfa/hypermeow/binary/proto"
     meowcaller "github.com/purpshell/meowcaller"
 )

@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	internalNapi "sirherobrine23.com.br/Sirherobrine23/napi-go/internal/napi"
+	internalNapi "frm/napi-go/internal/napi"
 )
 
 var typeofError = reflect.TypeFor[error]()

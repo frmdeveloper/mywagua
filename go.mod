@@ -9,7 +9,6 @@ require (
 	github.com/polymorfa/hypermeow v0.0.0-20260906031440-90f9e4ec2c88
 	github.com/purpshell/meowcaller v0.0.0-20260906234207-c48c3e2a243c
 	google.golang.org/protobuf v1.36.12
-	sirherobrine23.com.br/Sirherobrine23/napi-go v0.1.2
 )
 
 require (
@@ -43,5 +42,3 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )
-
-replace sirherobrine23.com.br/Sirherobrine23/napi-go => ./napi-go

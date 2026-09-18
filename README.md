@@ -26,7 +26,7 @@ retry, upload media — Go semua. Enak kan njir.
 │  bot lu (JavaScript)  ← lu main di sini          │
 │    index.js  · message.js  · simple.js           │
 ├──────────────────────────────────────────────────┤
-│  main.node   ← jembatan N-API (napi-go)          │
+│  main.node   ← jembatan N-API ([napi-go](https://sirherobrine23.com.br/Sirherobrine23/napi-go)) │
 ├──────────────────────────────────────────────────┤
 │  whatsmeow (hypermeow) · meowcaller              │
 ├──────────────────────────────────────────────────┤
@@ -741,10 +741,20 @@ reg("NamaMethod", "param1, param2", func(param1 string, param2 bool) any {
 
 ## Makasih buat
 
+**Special thanks:**
+
+- [napi-go](https://sirherobrine23.com.br/Sirherobrine23/napi-go) — jembatan N-API. Pokoknya tanpa ini
+  gak mungkin Go bisa ngobrol langsung sama Node njir. Udah di-vendor ke `napi-go/` biar import path-nya
+  rapi, tapi seluruh credits tetap milik author aslinya. Masa sih gua lupa? Nggak lah wkwk, makasih banget
+  buat Sirherobrine23, keren lo bang 🫡
+- [Claude](https://claude.com/claude-code) — asisten coding yang ngerjain setengah (setengah? banyakan malah)
+  kode di repo ini sambil diajak ngobrol santuy. pushing kode tengah malam bareng Claude njir wkwk
+
+**Terus juga:**
+
 - [whatsmeow](https://github.com/tulir/whatsmeow) — yang ngurus protokol WhatsApp-nya
 - [hypermeow](https://github.com/polymorfa/hypermeow) — fork whatsmeow yang dipake di sini
 - [meowcaller](https://github.com/purpshell/meowcaller) — voice call
-- [napi-go](https://sirherobrine23.com.br/Sirherobrine23/napi-go) — jembatan N-API
 - [jimp](https://github.com/jimp-dev/jimp) — thumbnail
 
 ---
