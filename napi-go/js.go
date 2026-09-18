@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -17,6 +18,30 @@ const propertiesTagName = "napi"
 // and returns the resulting N-API value (napiValue) or an error if the conversion fails.
 func ValueOf(env EnvType, value any) (napiValue ValueType, err error) {
 	return valueOf(env, reflect.ValueOf(value))
+}
+
+func keyValueOf(keyStr string, keyValue reflect.Value) error {
+	switch keyValue.Kind() {
+	case reflect.String:
+		keyValue.SetString(keyStr)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		n, err := strconv.ParseInt(keyStr, 10, 64)
+		if err != nil {
+			return err
+		}
+		keyValue.SetInt(n)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		n, err := strconv.ParseUint(keyStr, 10, 64)
+		if err != nil {
+			return err
+		}
+		keyValue.SetUint(n)
+	case reflect.Bool:
+		keyValue.SetBool(keyStr == "true")
+	default:
+		return fmt.Errorf("unsupported map key type: %s", keyValue.Kind())
+	}
+	return nil
 }
 
 // ValueFrom converts a N-API value (napiValue) to a Go value and stores the result in v.
@@ -193,8 +218,21 @@ func valueOf(env EnvType, ptr reflect.Value) (napiValue ValueType, err error) {
 		if err != nil {
 			return nil, err
 		}
-		for ptrKey, ptrValue := range ptr.Seq2() {
-			key, err := valueOf(env, ptrKey)
+		keys := make([]string, 0, ptr.Len())
+		for mapKey := range ptr.Seq2() {
+			keys = append(keys, fmt.Sprint(mapKey.Interface()))
+		}
+		sort.Strings(keys)
+		keyValue := reflect.New(ptr.Type().Key()).Elem()
+		for _, keyStr := range keys {
+			if err := keyValueOf(keyStr, keyValue); err != nil {
+				return nil, err
+			}
+			ptrValue := ptr.MapIndex(keyValue)
+			if !ptrValue.IsValid() {
+				continue
+			}
+			key, err := valueOf(env, keyValue)
 			if err != nil {
 				return nil, err
 			}
