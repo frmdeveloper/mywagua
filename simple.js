@@ -44,7 +44,7 @@ export const swmeow = async(conn, m) => {
         msg.quoted.from = msg.from
         msg.quoted.id = msg.msg.contextInfo.stanzaID
         msg.quoted.sender = msg.msg.contextInfo.participant.replace(/:[0-9]+/,"")
-        msg.quoted.fromMe = msg.quoted.sender.replace(/:[0-9]+/,"") == conn.Store().ID
+        msg.quoted.fromMe = [conn.Store().ID, conn.Store().LID].some(id => id && msg.quoted.sender.split("@")[0] == id.split("@")[0].replace(/:[0-9]+/,""))
         msg.quoted.key = { remoteJid: msg.quoted.from, id: msg.quoted.id, fromMe: msg.quoted.fromMe, participant: msg.quoted.sender }
         msg.quoted.text = isi?.caption || isi?.text || isi?.message?.documentMessage?.caption || isi || ""
         msg.quoted.mentionedJid = quoted[type]?.contextInfo?.mentionedJID
