@@ -17,11 +17,13 @@ export const swmeow = async(conn, m) => {
     }
     if (m.RawMessage) {
         m.message = m.RawMessage
-        m.message = m.message.viewOnceMessageV2?.message ||
+        msg.statusMention = !!m.message.groupStatusMentionMessage
+        m.message = m.message.groupStatusMentionMessage?.message ||
+            m.message.viewOnceMessageV2?.message ||
             m.message.documentWithCaptionMessage?.message ||
             m.message.editedMessage?.message?.protocolMessage?.editedMessage ||
             m.message.deviceSentMessage?.message ||
-            m.message 
+            m.message
         let mtype = Object.keys(m.message)
         msg.type = mtype.find(k => (k === 'conversation' || k.includes('Message')) && k !== 'senderKeyDistributionMessage')
         msg.msg = m.message[msg.type]
