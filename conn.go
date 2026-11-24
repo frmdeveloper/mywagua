@@ -347,7 +347,7 @@ conn["relayMessage"] = func(jid string, message any, a any) any {
     return Res(ok)
 }; p["relayMessage"] = "jid, message, options"
 
-conn["SendAudioSticker"] = func(jid string, sticker string, audio string, seconds int64, stanzaID string, participant string, quoted any) any {
+conn["SendAudioSticker"] = func(jid string, sticker string, audio string, seconds int64, mention string) any {
     Jid, err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
     upS, err := c.C.Upload(context.Background(), Atob(sticker), whatsmeow.MediaImage)
@@ -380,13 +380,8 @@ conn["SendAudioSticker"] = func(jid string, sticker string, audio string, second
             },
         },
     }
-    if stanzaID != "" {
-        var qm *waProto.Message
-        if quoted != nil {
-            var q *waProto.Message
-            if json.Unmarshal([]byte(ToJson(quoted)), &q) == nil { qm = q }
-        }
-        stik.ContextInfo = &waProto.ContextInfo{ StanzaID: &stanzaID, Participant: &participant, QuotedMessage: qm }
+    if mention != "" {
+        stik.ContextInfo = &waProto.ContextInfo{ MentionedJID: []string{mention} }
     }
     ok, err := c.RelayMessage(Jid.String(), &waProto.Message{
         AudioStickerMessage: &waProto.FutureProofMessage{
@@ -395,7 +390,7 @@ conn["SendAudioSticker"] = func(jid string, sticker string, audio string, second
     }, L{})
     if err != nil { return Throw(env, err) }
     return Res(ok)
-}; p["SendAudioSticker"] = "jid, sticker, audio, seconds, stanzaID, participant, quoted"
+}; p["SendAudioSticker"] = "jid, sticker, audio, seconds, mention"
 
 
 conn["MarkRead"] = func(ids any, timestamp int64, chat string, sender string) any {
