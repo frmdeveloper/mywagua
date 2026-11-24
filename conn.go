@@ -21,6 +21,7 @@ import (
     "time"
     "frm/napi-go"
     waProto "github.com/polymorfa/hypermeow/binary/proto"
+    "github.com/polymorfa/hypermeow/proto/waE2E"
     meowcaller "github.com/purpshell/meowcaller"
 )
 
@@ -113,7 +114,7 @@ conn["FollowNewsletter"] = func(jid string) any {
 }; p["FollowNewsletter"] = "jid"
 
 conn["GetBlocklist"] = func() any {
-    res,err := Cli.GetBlocklist(ctx)
+    res,err := Cli.GetBlocklist(ctx, "")
     if err != nil { return Throw(env,err) }
     return Res(res)
 }; p["GetBlocklist"] = ""
@@ -346,6 +347,57 @@ conn["relayMessage"] = func(jid string, message any, a any) any {
     return Res(ok)
 }; p["relayMessage"] = "jid, message, options"
 
+conn["SendAudioSticker"] = func(jid string, sticker string, audio string, seconds int64, stanzaID string, participant string, quoted any) any {
+    Jid, err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    upS, err := c.C.Upload(context.Background(), Atob(sticker), whatsmeow.MediaImage)
+    if err != nil { return Throw(env, err) }
+    upA, err := c.C.Upload(context.Background(), Atob(audio), whatsmeow.MediaAudio)
+    if err != nil { return Throw(env, err) }
+    lebarS, tinggiS, gerakS := infoWebp(Atob(sticker))
+    stik := &waProto.StickerMessage{
+        URL: &upS.URL,
+        FileSHA256: upS.FileSHA256,
+        FileEncSHA256: upS.FileEncSHA256,
+        MediaKey: upS.MediaKey,
+        Mimetype: proto.String("image/webp"),
+        Width: proto.Uint32(lebarS),
+        Height: proto.Uint32(tinggiS),
+        IsAnimated: proto.Bool(gerakS),
+        StickerSentTS: proto.Int64(time.Now().UnixMilli()),
+        DirectPath: &upS.DirectPath,
+        FileLength: &upS.FileLength,
+        Audio: &waE2E.StickerMessage_AudioMessage{
+            AudioMessage: &waProto.AudioMessage{
+                URL: &upA.URL,
+                FileSHA256: upA.FileSHA256,
+                FileEncSHA256: upA.FileEncSHA256,
+                MediaKey: upA.MediaKey,
+                Mimetype: proto.String("audio/ogg; codecs=opus"),
+                FileLength: &upA.FileLength,
+                Seconds: proto.Uint32(uint32(seconds)),
+                DirectPath: &upA.DirectPath,
+            },
+        },
+    }
+    if stanzaID != "" {
+        var qm *waProto.Message
+        if quoted != nil {
+            var q *waProto.Message
+            if json.Unmarshal([]byte(ToJson(quoted)), &q) == nil { qm = q }
+        }
+        stik.ContextInfo = &waProto.ContextInfo{ StanzaID: &stanzaID, Participant: &participant, QuotedMessage: qm }
+    }
+    ok, err := c.RelayMessage(Jid.String(), &waProto.Message{
+        AudioStickerMessage: &waProto.FutureProofMessage{
+            Message: &waProto.Message{ StickerMessage: stik },
+        },
+    }, L{})
+    if err != nil { return Throw(env, err) }
+    return Res(ok)
+}; p["SendAudioSticker"] = "jid, sticker, audio, seconds, stanzaID, participant, quoted"
+
+
 conn["MarkRead"] = func(ids any, timestamp int64, chat string, sender string) any {
     var msgIDs []types.MessageID
     if err := json.Unmarshal([]byte(ToJson(ids)), &msgIDs); err != nil { return Throw(env, err) }
@@ -465,7 +517,7 @@ conn["GetUserDevicesContext"] = func(jids any) any {
 conn["UpdateBlocklist"] = func(jid string, action string) any {
     Jid, err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
-    res, err := Cli.UpdateBlocklist(ctx, Jid, events.BlocklistChangeAction(action))
+    res, err := Cli.UpdateBlocklist(ctx, Jid, events.BlocklistChangeAction(action), "")
     if err != nil { return Throw(env, err) }
     return Res(res)
 }; p["UpdateBlocklist"] = "jid, action"
@@ -1149,4 +1201,22 @@ func SetupCaller(env napi.EnvType, caller *meowcaller.Client, push func(any), co
         if err := call.SendVideo(au); err != nil { return Throw(env, err) }
         return nil
     }; p["playVideo"] = "callId, path"
+}
+
+func infoWebp(b []byte) (uint32, uint32, bool) {
+    if len(b) < 30 || string(b[0:4]) != "RIFF" || string(b[8:12]) != "WEBP" { return 0, 0, false }
+    switch string(b[12:16]) {
+    case "VP8X":
+        w := 1 + uint32(b[24]) | uint32(b[25])<<8 | uint32(b[26])<<16
+        h := 1 + uint32(b[27]) | uint32(b[28])<<8 | uint32(b[29])<<16
+        return w, h, b[20]&0x02 != 0
+    case "VP8L":
+        v := uint32(b[21]) | uint32(b[22])<<8 | uint32(b[23])<<16 | uint32(b[24])<<24
+        return (v & 0x3FFF) + 1, ((v >> 14) & 0x3FFF) + 1, false
+    case "VP8 ":
+        w := uint32(b[26]) | uint32(b[27]&0x3F)<<8
+        h := uint32(b[28]) | uint32(b[29]&0x3F)<<8
+        return w, h, false
+    }
+    return 0, 0, false
 }
