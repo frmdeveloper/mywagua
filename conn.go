@@ -51,6 +51,42 @@ func ToJson(ani any) string {
     jsons,_ := json.Marshal(ani)
     return string(jsons)
 }
+func bersihkanAudioStiker(v any) any {
+    switch t := v.(type) {
+    case map[string]any:
+        for k, val := range t {
+            if strings.EqualFold(k, "stickerMessage") {
+                if sm, ok := val.(map[string]any); ok {
+                    for kk := range sm {
+                        if strings.EqualFold(kk, "audio") {
+                            delete(sm, kk)
+                        }
+                    }
+                }
+            }
+            t[k] = bersihkanAudioStiker(val)
+        }
+        return t
+    case []any:
+        for i, e := range t {
+            t[i] = bersihkanAudioStiker(e)
+        }
+        return t
+    default:
+        return v
+    }
+}
+func jsonBersih(s string) string {
+    var v any
+    if err := json.Unmarshal([]byte(s), &v); err != nil {
+        return s
+    }
+    b, err := json.Marshal(bersihkanAudioStiker(v))
+    if err != nil {
+        return s
+    }
+    return string(b)
+}
 func Res(a any) interface{} {
     var jsonData interface{}
     ua := json.Unmarshal([]byte(ToJson(a)), &jsonData)
@@ -335,7 +371,7 @@ conn["ParseMention"] = func(text string) []string {
 
 conn["relayMessage"] = func(jid string, message any, a any) any {
     var mes *waProto.Message
-    ua := json.Unmarshal([]byte(ToJson(message)), &mes)
+    ua := json.Unmarshal([]byte(jsonBersih(ToJson(message))), &mes)
     if ua != nil { return Throw(env,ua) }
 
     var b L
@@ -385,7 +421,7 @@ conn["SendAudioSticker"] = func(jid string, sticker string, audio string, second
         var qm *waProto.Message
         if quoted != nil {
             var q *waProto.Message
-            if json.Unmarshal([]byte(ToJson(quoted)), &q) == nil { qm = q }
+            if json.Unmarshal([]byte(jsonBersih(ToJson(quoted))), &q) == nil { qm = q }
         }
         ci = &waProto.ContextInfo{ StanzaID: &stanzaID, Participant: &participant, QuotedMessage: qm }
     }
@@ -402,6 +438,30 @@ conn["SendAudioSticker"] = func(jid string, sticker string, audio string, second
     if err != nil { return Throw(env, err) }
     return Res(ok)
 }; p["SendAudioSticker"] = "jid, sticker, audio, seconds, mention, stanzaID, participant, quoted"
+conn["SetGroupWallpaper"] = func(jid string, image string) any {
+    Jid, err := types.ParseJID(jid)
+    if err != nil { return Throw(env, err) }
+    up, err := c.C.Upload(context.Background(), Atob(image), whatsmeow.MediaImage)
+    if err != nil { return Throw(env, err) }
+    ok, err := c.RelayMessage(Jid.String(), &waProto.Message{
+        ProtocolMessage: &waProto.ProtocolMessage{
+            Type: waE2E.ProtocolMessage_CHAT_THEME_SETTING.Enum(),
+            ChatThemeSetting: &waE2E.ChatThemeSetting{
+                SettingTimestampMS: proto.Int64(time.Now().UnixMilli()),
+                Wallpaper: &waE2E.ChatThemeSetting_CustomImage{
+                    CustomImage: &waE2E.ChatCustomImageWallpaper{
+                        DirectPath: &up.DirectPath,
+                        MediaKey: up.MediaKey,
+                        FileEncSHA256: up.FileEncSHA256,
+                        FileSHA256: up.FileSHA256,
+                    },
+                },
+            },
+        },
+    }, L{})
+    if err != nil { return Throw(env, err) }
+    return Res(ok)
+}; p["SetGroupWallpaper"] = "jid, image"
 
 
 conn["MarkRead"] = func(ids any, timestamp int64, chat string, sender string) any {
