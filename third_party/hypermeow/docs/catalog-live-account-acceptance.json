@@ -1,0 +1,62 @@
+{
+  "reference": "setupautomatizado/zuckzapgo-private:v2.4.2",
+  "referenceHttpComparison": {
+    "executed": false,
+    "licensedTestEnvironmentAvailable": false,
+    "startupEvidence": "reference-runtime-acceptance.json"
+  },
+  "scope": "Previously paired, operator-designated WhatsApp test account; own seller only",
+  "observedAt": "2026-11-11T01:06:29.539729+00:00",
+  "baselineServerRevision": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2",
+  "probe": {
+    "connected": true,
+    "identifiableOwnBusinessProfile": false,
+    "productCount": null,
+    "collectionCount": null,
+    "reads": [
+      {
+        "operation": "own-catalog",
+        "managerHttpStatus": 502,
+        "sdkGraphQLErrorCode": 400,
+        "retryableReportedBySdk": false
+      },
+      {
+        "operation": "own-catalog-collections",
+        "managerHttpStatus": 502,
+        "sdkGraphQLErrorCode": 400,
+        "retryableReportedBySdk": false
+      }
+    ],
+    "pairedRuntimeReconnected": true
+  },
+  "writes": {
+    "requestsSent": 0,
+    "disposableProductIdentified": false,
+    "liveCollectionAndVisibilityAcceptance": "pending"
+  },
+  "serverPullRequest": "https://github.com/wppconnect-team/wppconnect-server-go/pull/36",
+  "serverChecks": "https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42936768438",
+  "managerVerificationAfterFix": {
+    "checkedAt": "2026-11-11T01:15:53.363714+00:00",
+    "pairedSessionConnected": true,
+    "sourceSha": "f739440a12d7b6344b460b2ad047829d6becf63d",
+    "image": "sha256:b4ce1fd8857eb8d950c4e4c322e0b422352341afa94f74ccc780b0c42dac3473",
+    "reads": {
+      "own-catalog": {
+        "httpStatus": 502,
+        "publicMessage": "WhatsApp catalog query failed (GraphQL 400)"
+      },
+      "own-catalog-collections": {
+        "httpStatus": 502,
+        "publicMessage": "WhatsApp catalog query failed (GraphQL 400)"
+      }
+    },
+    "healthyGoReserves": 3,
+    "reserveRevision": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2"
+  },
+  "operatorConfirmation": {
+    "pairedAccountType": "personal",
+    "hasCatalog": false,
+    "source": "operator confirmation after the read-only probe"
+  }
+}

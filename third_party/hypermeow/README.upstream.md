@@ -1,0 +1,266 @@
+# HyperMeow
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/polymorfa/hypermeow.svg)](https://pkg.go.dev/github.com/polymorfa/hypermeow)
+[![Go](https://github.com/polymorfa/hypermeow/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/polymorfa/hypermeow/actions/workflows/go.yml)
+
+HyperMeow is Polymorfa's production-focused fork of [tulir/whatsmeow](https://github.com/tulir/whatsmeow). It keeps the upstream Go package names and protocol foundation while adding the business-app surface, LID-first identity model, bounded state, PostgreSQL efficiency, and reliability controls needed for large multi-session deployments.
+
+The upstream project remains the smaller choice for applications that only need its core WhatsApp messaging scope. HyperMeow deliberately accepts a broader API and maintenance surface in exchange for the capabilities below.
+
+## Why HyperMeow instead of upstream WhatsMeow?
+
+This comparison was last verified against upstream `main` at [`c88388f`](https://github.com/tulir/whatsmeow/commit/c88388f983b4bc43dfd0bcc2b46969fcde82d61f) on 2026-11-12. Each upstream sync must update this section when the difference changes.
+
+| Area | HyperMeow advantage over upstream `main` |
+| --- | --- |
+| Business app | Adds linked-account and eligibility reads, business-profile and cover-photo mutation, product and collection mutation, catalog creation, cart and visibility controls, appeal and merchant-compliance operations, and validated business message builders. |
+| Native Flows | Adds typed address, list, order, and Flow message builders with payload limits, exact JSON-number preservation, UTF-8 validation, and response metadata handling. |
+| Identity | Treats LIDs as the stable Signal identity, persists PN and username aliases, resolves aliases in batches, exposes phone-number consent messages, and generates LID identity verification codes. |
+| App state | Adds atomic label replacement, label and quick-reply events, full-sync event controls, and independent history-sync receipt, storage, and media-deletion policies. |
+| Channels | Adds newsletter deletion through generated MEX bindings. |
+| Reliability | Hardens malformed binary-node handling, serializes device save/delete operations, surfaces participant-hash mismatches, bounds attacker-influenced caches, and redacts sensitive business payloads from node logs. |
+| PostgreSQL | Batches Signal and metadata work, avoids empty PN-to-LID transactions, adds indexed alias lookups, and keeps PostgreSQL authoritative after bounded cache eviction. |
+| Validation | Ships a reproducible Barback/PostgreSQL harness covering DM, group, history, media, mixed-message, security-code, phone-consent, resource, and saturation workloads. |
+
+### Measured system advantages
+
+The repository retains the raw reports and methodology behind these numbers in [`benchmark/barback/testdata/results`](benchmark/barback/testdata/results). They compare frozen revisions under the same local Barback, PostgreSQL, TLS, Noise, CPU, and memory constraints. They are engineering comparisons, not WhatsApp WAN or account-rate-limit claims.
+
+| Measurement | Upstream WhatsMeow | HyperMeow | Result |
+| --- | ---: | ---: | ---: |
+| Disconnected constructor heap, 2,000 clients | 78,929 B/client | 4,240 B/client | 94.6% less Go heap |
+| Group-128 send p95 | 33.998 ms | 7.024 ms | 79.3% lower |
+| Group-128 client CPU | 5.502 s | 2.301 s | 58.2% lower |
+| Group-128 SQL calls | 165,053 | 3,456 | 97.9% fewer |
+| Highest healthy encrypted ping-pong rate | 900 pairs/s | 1,700 pairs/s | 1.89x the rate |
+
+The complete three-repeat system matrix documents allocation, RSS, CPU, latency, PostgreSQL, network, and I/O results across five workloads. It also records the trade-offs: history-heavy peak RSS was slightly higher in one comparison, and active-session capacity depends on contacts, groups, media, handlers, and application queues rather than constructor memory alone.
+
+- [System comparison](benchmark/barback/testdata/results/system-comparison.md)
+- [RAM hardening](benchmark/barback/testdata/results/ram-hardening.md)
+- [Ping-pong saturation](benchmark/barback/testdata/results/maxrate-ping-pong.md)
+- [Benchmark instructions](benchmark/barback/README.md)
+
+## Install
+
+HyperMeow requires Go 1.26 or newer; the module selects Go 1.27.2 as its preferred toolchain.
+
+Install the newest reviewed commit from the authoritative `main` branch:
+
+```sh
+go get github.com/polymorfa/hypermeow@main
+```
+
+The `main` query resolves to a commit pseudo-version. Pin the resulting
+pseudo-version in `go.mod` for reproducible builds. Every published semantic
+version is retracted: do not install HyperMeow with `@latest`, a version tag, or
+any feature branch.
+
+To experiment with changes that have not reached `main`, use the integration
+branch explicitly:
+
+```sh
+go get github.com/polymorfa/hypermeow@dev
+```
+
+`dev` is unstable and may be rebased. Do not use it in production or publish a
+library that depends on it.
+
+The root package remains named `whatsmeow`, so use an explicit import alias:
+
+```go
+import whatsmeow "github.com/polymorfa/hypermeow"
+```
+
+## Migrating from WhatsMeow
+
+Replace `go.mau.fi/whatsmeow` imports with `github.com/polymorfa/hypermeow` and remove any old module replacement:
+
+```sh
+go mod edit -dropreplace=go.mau.fi/whatsmeow
+go get github.com/polymorfa/hypermeow@main
+go mod tidy
+```
+
+## Newsletter observations
+
+`NewsletterMessage.ViewCounts` preserves the reported view definitions, including
+an untyped legacy count and a separate `views` count. It does not select an
+account's view-definition gate. `ViewsCountPresent` and `ForwardsCountPresent`
+distinguish a reported zero from an absent or malformed counter. The existing
+scalar count fields remain available.
+
+A nil `ReactionCounts` means no valid reaction observation; an allocated empty
+map preserves an explicitly empty list. These observations do not reproduce the
+client's local database reconciliation. Original message IDs and timestamps may
+be absent in a live observation; its server position is a separate reference.
+
+`NewsletterMilestone` accepts quoted and numeric decimal integer positions
+without converting through floating point. An absent, `null` or zero position
+means the milestone has no message (for example a follower-count milestone) and
+decodes as position 0. It rejects negative, empty, fractional and overflowing
+positions. Its JSON output keeps quoted positions.
+
+## Core compatibility
+
+HyperMeow retains upstream's core support for:
+
+- private, group, media, and status messages;
+- group management and invite links;
+- typing, delivery, and read receipts;
+- app-state synchronization;
+- retry receipts and message decryption recovery.
+
+New exported functionality is additive unless called out in the [changelog](CHANGELOG.md).
+
+### Remote Signal stores
+
+`NewRemoteSignalClient` uses a customer-held Signal store through `RemoteSignal`.
+The store supplies public prekeys and builds encrypted message stanzas; private
+keys and message plaintext stay outside HyperMeow. Applications implementing the
+interface must implement both durable upload operations:
+
+- `PreparePreKeyUpload(ctx, count)` returns a `RemotePreKeyUploadBatch` with an
+  opaque 32-character lowercase hexadecimal `BatchID` and 1–812 public `PreKeys`.
+  `count` selects a fresh batch size. An outstanding batch returns all surviving
+  keys in its original order, even when its size differs from `count`. Persist
+  that batch across service restarts; do not truncate it or generate a top-up.
+- `AcknowledgePreKeyUpload(ctx, batchID, ids)` commits the complete upload after
+  the WhatsApp upload IQ succeeds. IDs can cross the 24-bit wrap boundary. The
+  acknowledgement covers every surviving key; consumed original members can
+  remain in the list and must not be recreated. Replaying the last exact ACK
+  after a lost response succeeds without changing a newer batch.
+
+The adapter captures independent public-key and ID snapshots. It checks the
+literal last uploaded ID and acknowledges the entire captured list. A failed IQ
+does not acknowledge the batch. After an attempted ACK fails, the adapter retains
+it and resolves that exact ACK before preparing another batch. Unsupported remote
+operations fail; there is no fresh-generation fallback. Upload serialization and
+the adapter mutex keep upload state separate from retry-receipt generation.
+
+`GeneratePreKeys` and `MarkPreKeysUploaded` remain separate operations for fresh
+retry-receipt keys. `GenOnePreKey` generates one fresh key and marks it published;
+it never borrows from a prepared upload batch. Remote implementations must reject
+legacy marking of prepared-batch members. Returned one-time prekeys must have
+unique nonzero 24-bit IDs, a nonzero 32-byte public key, and no private key or
+signed-prekey signature.
+
+This interface change requires matching remote-store implementations. It does
+not establish that a service is deployed or a feature is available to customers.
+Production consumers continue to pin reviewed `main` pseudo-versions.
+
+`SendMessage` and `SendFBMessage` return the destination used for sending in
+`SendResponse.Chat`. `GetQRChannel` refreshes its active QR code when pairing
+secrets rotate. Full-sync fetch errors emit `events.AppStateSyncError` after
+releasing the sync lock, so a handler can retry the fetch.
+
+The `types/richresponse` package decodes rich bot responses. Known primitives
+retain their type names during JSON round trips; unknown primitives, view models,
+and text-entity metadata retain their raw JSON. Malformed known values return a
+decode error.
+
+Custom `store.ChatSettingsStore` implementations must add `PutWASARootSecretID`
+and `GetWASARootSecretID` for bot root-secret state. `sqlstore` adds this field
+through schema version 19; its existing migrations remain unchanged. Schema
+version 20 adds the device `is_hosted` flag for hosted (coexistence) pairing.
+
+## Connection options
+
+Connections use one WebSocket endpoint by default. To try both WhatsApp chat
+endpoints concurrently, configure the client before connecting:
+
+```go
+import (
+    whatsmeow "github.com/polymorfa/hypermeow"
+    "github.com/polymorfa/hypermeow/socket"
+)
+
+// client is an existing *whatsmeow.Client.
+client.SocketConfig = &whatsmeow.SocketConfig{
+    RaceURLs: append([]string(nil), socket.RaceURLs...),
+}
+```
+
+`SocketConfig.RaceURLs` activates racing when it contains at least two URLs.
+The first successful upgrade wins. Pending upgrades are canceled, and opened
+losers close asynchronously with status 1000 and reason `loser socket`.
+The winner proceeds without waiting for those close handshakes. If every
+endpoint fails, the returned error joins the failures in configured URL order.
+Initial background reconnect classification uses the first matching HTTP status
+in configured URL order, ahead of network errors from other endpoints. When no
+HTTP status is present, network and dial failures remain retryable. The existing
+single-endpoint retry rules remain unchanged.
+
+With zero or one race URL, the client uses `SocketConfig.URL`, or the default
+endpoint if `URL` is empty. With racing enabled, the list supplies the endpoints
+and `URL` is ignored. `SocketConfig.Origin` and `Client.WebSocketHeaders` apply to
+all racers. Repeated header values and empty entries that suppress defaults are
+preserved. Browsers control request headers on JS/WASM builds, as they do for
+single-endpoint connections.
+
+`Client.DisablePostConnectPassiveIQ` defaults to `false`. Set it to `true` only
+when your login payload already declares `passive: false`; the client then skips
+the post-connect passive/active IQ. This option does not change the login payload.
+Configure both options before connecting rather than while a connection is active.
+
+## Discord
+
+Join the [WhatsApp Web ecosystem Discord](https://whiskey.so/discord) and visit
+`#hypermeow` for project discussion.
+
+## Get support
+
+If you'd like business to enterprise-level support from Rajeh, you can book a video
+chat. Book a 1 hour time slot by contacting him on Discord or pre-ordering
+[here](https://purpshell.dev/book). The earlier you pre-order the better, as his
+time slots usually fill up very quickly.
+
+If you are a business, we encourage you to contribute back to the development costs
+of the project. You can do so by booking meetings or sponsoring below. All support
+is welcome from businesses of all sizes.
+
+## Sponsor
+
+If you'd like to financially support this project, you can do so
+[here](https://purpshell.dev/sponsor).
+
+## Disclaimer
+
+> [!CAUTION]
+> This project is not affiliated, associated, authorized, endorsed by, or in any way
+> officially connected with WhatsApp or any of its subsidiaries or its affiliates.
+> The official WhatsApp website can be found at whatsapp.com. "WhatsApp" as well as
+> related names, marks, emblems and images are registered trademarks of their
+> respective owners.
+>
+> The maintainers do not condone using this project in practices that violate the
+> Terms of Service of WhatsApp, and call upon users to use it fairly.
+
+## License
+
+Upstream-derived files retain their original Tulir Asokan and contributor
+copyright notices and remain licensed under [MPL-2.0](LICENSE).
+
+Polymorfa-added files: Copyright (c) 2026 Rajeh Taher, licensed under the
+[MIT License](LICENSE-MIT).
+
+See [LICENSING.md](LICENSING.md) for the file-level boundary.
+
+### Connection lifecycle observers
+
+`AddConnectionEventHandler(func(context.Context, any))` observes `Connected`,
+`Disconnected`, `QR`, `LoggedOut`, `StreamReplaced` and `CATRefreshError`. The context is the original
+connection's `ConnectContext` argument, captured before asynchronous delivery.
+A delayed event can arrive after that context is cancelled. Compare it with the
+connection authority your application owns before updating state; do not label an
+old event using the newest connection. `RemoveConnectionEventHandler(id)` removes
+a registration; an already captured callback can still arrive. Callbacks run
+without the observer registry lock and can remove themselves.
+
+Generic `AddEventHandler` consumers still receive these events. Other event types
+retain their existing API. Connection observers do not authorize a send, undo
+bytes already sent or prove that a cancelled socket has finished closing.
+Disconnect and wait for owned work to settle before accepting replacement
+connection authority. `FrameSocket.SetOnDisconnect` replaces the callback under the socket lock; assign
+the legacy field only before connecting.
+These additions are unreleased until their reviewed main commit is adopted.

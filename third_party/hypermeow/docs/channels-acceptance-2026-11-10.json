@@ -1,0 +1,66 @@
+{
+  "server": {
+    "sourceArchiveSha256": "9c6e21064b55ee04ecacf06bc67d05cfb5883f3805ca4b430c4ad003ccc20cc1",
+    "sha": "4fb3d7f13de475af0e6fa7bcd89b733b12105121",
+    "pr": 21,
+    "ciRun": 42895236212,
+    "tag": "wppconnect-local/go:4fb3d7f13de4",
+    "image": "sha256:59f610bd5d2060cd4b1eecff4ac134f7a41a49d696e97bdac68461b4eeff508a"
+  },
+  "canary": {
+    "channelContracts": 8,
+    "channelResultNamespaces": true,
+    "failedDeliveryInspected": true,
+    "signedDeliveryRecovery": true,
+    "onlyFailedTargetReplayed": true,
+    "replayAudit": true,
+    "crossSessionIsolation": true,
+    "capacityMetrics": true,
+    "idempotentHTTPResult": true,
+    "changedPayloadConflict": true,
+    "resultSurvivesRestart": true,
+    "messagesSent": 0,
+    "phonePaired": false,
+    "productionContainersPreserved": true,
+    "fixturesRemoved": true
+  },
+  "pool": {
+    "checkedAt": "2026-11-10T20:41:07.044231+00:00",
+    "reserves": 3,
+    "allHealthy": true,
+    "temporaryContainersAbsent": true
+  },
+  "cloudDocsBrowser": [
+    {
+      "locale": "en",
+      "width": 1440,
+      "theme": "light",
+      "localizedHeading": true,
+      "contractLink": true,
+      "keyboardFocus": true,
+      "sectionFits": true
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "theme": "dark",
+      "localizedHeading": true,
+      "contractLink": true,
+      "keyboardFocus": true,
+      "sectionFits": true
+    }
+  ],
+  "externalDeviceChecks": "deferred",
+  "cloudProduction": {
+    "sha": "5b9f3e89ba241b2a2ceb3b937b65e3bda3d58b3f",
+    "deployment": "dpl_Ah765QkiP9XgAGAPHzWmeWctfqjd",
+    "publicPortugueseGuide": true,
+    "unauthenticatedRouteProbe": {
+      "newsletter-info-invite": 401,
+      "newsletter-reaction": 401,
+      "newsletter-admin-invite": 401,
+      "newsletter-admin-result": 401,
+      "unknown-verification-action": 404
+    }
+  }
+}

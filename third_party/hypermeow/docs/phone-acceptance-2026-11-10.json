@@ -1,0 +1,28 @@
+{
+  "checkedAtUTC": "2026-11-10T19:55:21.626396+00:00",
+  "sourceSha": "e01698bf3e8b0b9d9dc749e7ffbb49e65deab22f",
+  "image": "sha256:b0d96f63e775038ff4c71cfdf4630763712fe8e978ff555dedb685cae8ed9b5b",
+  "qrPaired": true,
+  "textAndFileAccepted": true,
+  "deliveredMessages": 2,
+  "readMessages": 2,
+  "replyReceived": true,
+  "sameKeyReplaysSameResult": true,
+  "changedPayloadBlocked": true,
+  "otherWorkspaceBlocked": true,
+  "initialFailurePreserved": true,
+  "restart": {
+    "connectedAfterRestart": true,
+    "successfulSendResultsPreserved": 2,
+    "originalFailurePreserved": true,
+    "mediaDownloadedAfterRestartMatchesOriginal": true,
+    "offlineBackupRestoreValidated": true,
+    "sqliteDatabasesChecked": 5,
+    "backupSha256": "314f803da63175c1da14d082102cae5b377db2e468e7a58d9be45e7dc51591af",
+    "sourceSha": "e01698bf3e8b0b9d9dc749e7ffbb49e65deab22f",
+    "image": "sha256:b0d96f63e775038ff4c71cfdf4630763712fe8e978ff555dedb685cae8ed9b5b"
+  },
+  "logoutTested": false,
+  "twoPairedAccountsTested": false,
+  "fullZuckParityValidated": false
+}

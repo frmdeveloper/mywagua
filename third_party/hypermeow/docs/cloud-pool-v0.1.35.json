@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-11-11T04:43:11.934385+00:00",
+  "version": "v0.1.35",
+  "source": "1293a52d5bfd772ae8d8e0d53116465e295bd2fd",
+  "image": "wppconnect/wppconnect-server-go:v0.1.35@sha256:d1079e6ab33d1c20896d67d4ddbef6de0a77ef30242a73c209d97e1baca160b5",
+  "previousDefault": "wppconnect-local/go:a7c46b0c3a1c",
+  "workerDefaultMatches": true,
+  "healthyGoReserves": 3,
+  "freshManagerAllocationVerified": true,
+  "unpairedManagerContractsTested": 5,
+  "disposableAllocationsRemoved": 4,
+  "previousReservesRetired": 3,
+  "allocatedContainersPreserved": 2,
+  "workerDatabaseChecks": "ok",
+  "criticalLogEntries": 0,
+  "rollbackConfigSaved": true,
+  "previousImageRetained": true
+}

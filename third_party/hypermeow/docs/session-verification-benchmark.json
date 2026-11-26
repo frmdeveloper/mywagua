@@ -1,0 +1,72 @@
+{
+  "before": {
+    "fixtureImage": "sha256:6d44ed3588a0d4110ceabaa8549281d6822e434dfbd0acc97528ee68b3623d8c",
+    "source": "765625fbc4d55cd5a2506ccd6527b632283e46da",
+    "cpuLimit": 0.75,
+    "memoryLimitMiB": 256,
+    "workload": "authenticated lookup of four recorded disconnected-channel results",
+    "profiles": [
+      {
+        "workers": 1,
+        "requests": 24,
+        "byteIdenticalResponses": 24,
+        "p50Ms": 97.05,
+        "p95Ms": 104.34,
+        "p99Ms": 114.71,
+        "requestsPerSecond": 10.43,
+        "cpuSeconds": 1.749,
+        "peakCgroupMemoryBytes": 12759040
+      },
+      {
+        "workers": 4,
+        "requests": 48,
+        "byteIdenticalResponses": 48,
+        "p50Ms": 383.65,
+        "p95Ms": 499.75,
+        "p99Ms": 534.02,
+        "requestsPerSecond": 10.28,
+        "cpuSeconds": 3.514,
+        "peakCgroupMemoryBytes": 15147008
+      }
+    ],
+    "recordsRecoveredAfterRestart": 4,
+    "crossSessionLookupsReturned404": 4,
+    "realWhatsAppMessages": 0,
+    "fixtureRemoved": true
+  },
+  "after": {
+    "fixtureImage": "sha256:b5e6e8113ba9ed0b4ea4bac01b29ad322847b659483bbfb132b60c5b90712c28",
+    "source": "fc69f9282c937930bc641d74c076bcf49deea84e",
+    "cpuLimit": 0.75,
+    "memoryLimitMiB": 256,
+    "workload": "authenticated lookup of four recorded disconnected-channel results",
+    "profiles": [
+      {
+        "workers": 1,
+        "requests": 24,
+        "byteIdenticalResponses": 24,
+        "p50Ms": 1.42,
+        "p95Ms": 2.63,
+        "p99Ms": 2.7,
+        "requestsPerSecond": 560.75,
+        "cpuSeconds": 0.019,
+        "peakCgroupMemoryBytes": 12509184
+      },
+      {
+        "workers": 4,
+        "requests": 48,
+        "byteIdenticalResponses": 48,
+        "p50Ms": 2.18,
+        "p95Ms": 4.05,
+        "p99Ms": 4.92,
+        "requestsPerSecond": 1553.71,
+        "cpuSeconds": 0.02,
+        "peakCgroupMemoryBytes": 12509184
+      }
+    ],
+    "recordsRecoveredAfterRestart": 4,
+    "crossSessionLookupsReturned404": 4,
+    "realWhatsAppMessages": 0,
+    "fixtureRemoved": true
+  }
+}

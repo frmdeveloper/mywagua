@@ -1,0 +1,39 @@
+{
+  "server": {
+    "ciRun": 42903287552,
+    "sha": "765625fbc4d55cd5a2506ccd6527b632283e46da",
+    "pr": 26,
+    "sourceArchiveSha256": "7fd3bdbcb31a6d0fe36abc087416184ed2468e765dbf1c9914b23f98daf34140",
+    "tag": "wppconnect-local/go:765625fbc4d5",
+    "image": "sha256:6d44ed3588a0d4110ceabaa8549281d6822e434dfbd0acc97528ee68b3623d8c"
+  },
+  "canary": {
+    "n8nTargetContract": true,
+    "carouselDisabledByDefault": true,
+    "catalogReadContracts": 3,
+    "brokerTargetContracts": 2,
+    "channelContracts": 8,
+    "channelResultNamespaces": true,
+    "failedDeliveryInspected": true,
+    "signedDeliveryRecovery": true,
+    "onlyFailedTargetReplayed": true,
+    "replayAudit": true,
+    "crossSessionIsolation": true,
+    "capacityMetrics": true,
+    "idempotentHTTPResult": true,
+    "changedPayloadConflict": true,
+    "resultSurvivesRestart": true,
+    "messagesSent": 0,
+    "phonePaired": false,
+    "productionContainersPreserved": true,
+    "fixturesRemoved": true
+  },
+  "pool": {
+    "checkedAt": "2026-11-10T21:31:07.427984+00:00",
+    "goReserves": 3,
+    "allHealthy": true,
+    "noRecentErrors": true,
+    "fixturesRemoved": true,
+    "existingConnectionPreserved": true
+  }
+}

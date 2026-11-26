@@ -1,0 +1,73 @@
+{
+  "sdk": {
+    "revision": "eb2a7d09b51162a1f703e26607ab78797dd41b7e",
+    "pullRequest": 14,
+    "observedWebSocketMetadata": "web-socket-observation.json",
+    "splitHeaderBenchmark": {
+      "payloadBytes": 65536,
+      "beforeAllocatedBytesPerOp": 73728,
+      "afterAllocatedBytesPerOp": 0,
+      "repetitions": 3
+    },
+    "rejectedEndpointFallbackTestRepetitions": 20
+  },
+  "server": {
+    "revision": "a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d",
+    "pr": 38,
+    "ciRun": 42948935834,
+    "image": "sha256:39fb41bbc0c5b91e9e7b3139f509f4ab89d08298d399c6f685d56cfb35dc67f4",
+    "archiveSha256": "5833eb2c276e36f7e1182581b7dfb971f1b3397b7a84ae0f9c336d0709658b8d"
+  },
+  "pool": {
+    "checkedAt": "2026-11-11T03:06:11.763364+00:00",
+    "healthyGoReserves": 3,
+    "offlineFavoriteReceiptChecked": true,
+    "testAllocationsDeleted": true
+  },
+  "liveFavorite": {
+    "checkedAt": "2026-11-11T03:02:59.527597+00:00",
+    "testFixtureCreated": true,
+    "firstStateObserved": true,
+    "stateSurvivedRestart": true,
+    "originalStateRestored": true,
+    "pairedSessionConnected": true,
+    "serverRevision": "a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d"
+  },
+  "cloud": {
+    "revision": "9b7ebf94a23cca166f1f4d28dd6c2ba3b8d95f26",
+    "pr": 46,
+    "ciRun": 42948631126,
+    "browserChecks": [
+      {
+        "locale": "en",
+        "width": 1440,
+        "starGuide": true
+      },
+      {
+        "locale": "pt",
+        "width": 375,
+        "starGuide": true
+      }
+    ],
+    "publicChecks": {
+      "locales": {
+        "pt": {
+          "http": 200,
+          "localizedFavoriteGuide": true
+        },
+        "en": {
+          "http": 200,
+          "localizedFavoriteGuide": true
+        }
+      },
+      "anonymousRoutes": {
+        "star-message": 401,
+        "message-state-result": 401,
+        "message-star-state": 401,
+        "not-a-cloud-action": 404
+      },
+      "checkedAt": "2026-11-11T03:07:18.347587+00:00"
+    },
+    "productionDeploymentId": 7700558138
+  }
+}

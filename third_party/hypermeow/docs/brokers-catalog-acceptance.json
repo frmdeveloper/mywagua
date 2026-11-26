@@ -1,0 +1,65 @@
+{
+  "server": {
+    "pr": 24,
+    "sourceArchiveSha256": "8fa170b8653e5d6737907c153fc11c16977d4600c4f8f498e01f22d7c3ebad41",
+    "ciRun": 42898825516,
+    "sha": "666afa223c12efefcb9ac90a2d6920d9ea3a1b11",
+    "tag": "wppconnect-local/go:666afa223c12",
+    "image": "sha256:49a88afea20f64521ed3bb453aeb4ef3bbc77ba45b43d011abd0645cabf8db78"
+  },
+  "canary": {
+    "catalogReadContracts": 3,
+    "brokerTargetContracts": 2,
+    "channelContracts": 8,
+    "channelResultNamespaces": true,
+    "failedDeliveryInspected": true,
+    "signedDeliveryRecovery": true,
+    "onlyFailedTargetReplayed": true,
+    "replayAudit": true,
+    "crossSessionIsolation": true,
+    "capacityMetrics": true,
+    "idempotentHTTPResult": true,
+    "changedPayloadConflict": true,
+    "resultSurvivesRestart": true,
+    "messagesSent": 0,
+    "phonePaired": false,
+    "productionContainersPreserved": true,
+    "fixturesRemoved": true
+  },
+  "pool": {
+    "checkedAt": "2026-11-10T21:05:10.233502+00:00",
+    "goReserves": 3,
+    "allHealthy": true,
+    "noRecentErrors": true,
+    "fixturesRemoved": true
+  },
+  "cloud": {
+    "source": "3751275b5385c92ea25f5db623669ac97aad4baa",
+    "deployment": "dpl_G2ZYf1MCKQ76YSp5UK5T6mwMPWGV",
+    "guideLanguages": [
+      "pt-BR",
+      "en"
+    ],
+    "protectedCatalogOperations": 3
+  },
+  "browser": [
+    {
+      "locale": "en",
+      "width": 1440,
+      "theme": "light",
+      "localizedHeading": true,
+      "scopeAndFields": true,
+      "sectionFits": true
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "theme": "dark",
+      "localizedHeading": true,
+      "scopeAndFields": true,
+      "sectionFits": true
+    }
+  ],
+  "realMerchantCatalogTested": false,
+  "productionDestinationsEnabled": false
+}

@@ -1,0 +1,75 @@
+{
+  "zuckReferenceId": "Z266",
+  "server": {
+    "revision": "bffcd90760a33f71e081e372044c7b41827b31e7",
+    "pullRequest": 37,
+    "ciRun": 42938509260,
+    "sourceArchiveSha256": "697f02f1c5232ec5333c97e220c27ab4bbc1c3b42a44cf800067ac663b14687f",
+    "imageId": "sha256:c891031c93b9cfbd0175ccd9783ef8fb1d48ae11c5d0157dc6894ab01a71ca58"
+  },
+  "cloud": {
+    "revision": "cacab30dd56295bee2a26485b8d8d9ce3083ff38",
+    "pullRequest": 45,
+    "ciRun": 42938508830,
+    "productionDeploymentId": 7699189333,
+    "web": {
+      "locales": {
+        "pt": {
+          "http": 200,
+          "localizedCartGuide": true
+        },
+        "en": {
+          "http": 200,
+          "localizedCartGuide": true
+        }
+      },
+      "anonymousRoutes": {
+        "set-cart-enabled": 401,
+        "catalog-write-result": 401,
+        "not-a-cloud-action": 404
+      },
+      "checkedAt": "2026-11-11T01:34:23.918149+00:00"
+    },
+    "browser": [
+      {
+        "locale": "en",
+        "width": 1440,
+        "theme": "light",
+        "localizedHeading": true,
+        "sellerCart": true,
+        "chatwootProvision": true,
+        "sectionFits": true
+      },
+      {
+        "locale": "pt",
+        "width": 375,
+        "theme": "dark",
+        "localizedHeading": true,
+        "sellerCart": true,
+        "chatwootProvision": true,
+        "sectionFits": true
+      }
+    ]
+  },
+  "canary": {
+    "catalogWritesKeyedAndRecovered": 4,
+    "productionContainersPreserved": true,
+    "fixturesRemoved": true,
+    "messagesSent": 0,
+    "phonePaired": false
+  },
+  "pool": {
+    "auditedAt": "2026-11-11T01:33:06.821634+00:00",
+    "healthyGoReserves": 3,
+    "imageId": "sha256:c891031c93b9cfbd0175ccd9783ef8fb1d48ae11c5d0157dc6894ab01a71ca58",
+    "pairedPersonalSessionConnected": true,
+    "testAllocationsDeleted": true,
+    "catalogWritesKeyedAndRecovered": 4,
+    "messagesSent": 0
+  },
+  "whatsAppBusinessAcceptance": {
+    "status": "pending",
+    "appliedToPersonalAccount": false,
+    "scope": "No real seller or buyer verification for the cart operation."
+  }
+}

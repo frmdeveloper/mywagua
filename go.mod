@@ -43,4 +43,4 @@ require (
 	golang.org/x/text v0.44.0 // indirect
 )
 
-replace github.com/polymorfa/hypermeow => github.com/wppconnect-team/hypermeow v0.0.0-20261122180840-bc45e05153b5
+replace github.com/polymorfa/hypermeow => ./third_party/hypermeow

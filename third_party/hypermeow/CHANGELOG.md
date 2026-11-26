@@ -1,0 +1,139 @@
+<!--
+Copyright (c) 2026 Rajeh Taher
+Licensed under the MIT License. See LICENSE-MIT for details.
+-->
+
+# Changelog
+
+All notable HyperMeow changes are documented here. HyperMeow uses commit pseudo-versions from its reviewed `main` branch.
+
+## [Unreleased]
+
+- Status broadcasts use the message handler. The stanza name is available in
+  `MessageInfo.StanzaTag`. Existing users of `IsNewsletterStatus` retain the
+  newsletter-specific flag.
+- WhatsApp Web protocol revision 1054751086 changes the wire type of Labyrinth
+  epoch IDs. Use `proto/waWebLabyrinthWaWasmV1054751086` with that revision.
+  The original `proto/waWebLabyrinthWaWasm` package continues to read and write
+  its original format. The versioned descriptor has its own protobuf namespace
+  so applications can import both packages.
+
+### Added
+
+- Opt-in concurrent WebSocket connections through `SocketConfig.RaceURLs`, with asynchronous loser cleanup and support for native and JS/WASM builds. See [connection options](README.md#connection-options).
+- `Client.DisablePostConnectPassiveIQ` to skip the post-connect passive/active IQ when the login payload already declares an active connection.
+- Persist hosted (coexistence) pairing as `store.Device.IsHosted` and report it on `events.PairSuccess.IsHosted`. SQL-backed stores upgrade to schema version 20, which adds `whatsmeow_device.is_hosted` (default `false`).
+- Add `types.AEAAccountType` (`not_set`, `e2ee`, `hybrid_e2ee`, `non_e2ee`) on `BusinessProfile`, `UserInfo` and `IsOnWhatsAppResponse`, read from `<aea_account_type>` in business profile and usync business results. `GetBusinessProfile` is the reliable source: `GetUserInfo` and `IsOnWhatsApp` do not request the business profile, so their field is set only when the server includes it.
+- Add `VerifiedName.Serial`, `Issuer`, `PrivacyMode`, `IsAPI` and `IsBusinessApp`, typed actual-actor and host-storage values, and `MessageInfo.BizPrivacyMode` from `<biz>` on business messages.
+- Add `UndecryptableMessage.IsHostedUnavailable` for `<unavailable hosted="true"/>`.
+
+### Fixed
+
+- Migrate an established hosted PN session when the peer starts sending from its hosted LID. SQL-backed migration uses literal address-prefix ranges so hosted underscores cannot select or delete another account's keys.
+- Use one Signal address for a hosted device 99 when decrypting its messages, sending to it and answering its retry receipts: `<lid>:99@hosted.lid` when the account's LID is known, otherwise `<pn>:99@hosted`. Hosted sessions no longer collide with a regular device 99, and sessions stored under the PN hosted address move to the LID hosted address. `MessageInfo.Sender` still reports hosted senders on the regular servers.
+- Redact shared-device and root secrets from app-state mutations in trace logs.
+- Decode newsletter milestone positions from either quoted or numeric integers without losing precision.
+- Preserve reported newsletter counter presence, explicit zeros and distinct view definitions. Omit malformed or ambiguous observations, including duplicate view definitions, instead of reporting fabricated zeros or truncated reaction lists.
+- Copy group-cache metadata under its lock before send-permission checks, including participant and admin slices, so notifications cannot race those reads.
+- Stop automatic reconnect and emit `CATRefreshError` to generic and connection-scoped observers when a 413/414 failure cannot refresh its token, including when `RefreshCAT` is unset. The missing callback returns `ErrCATRefreshUnavailable` instead of retrying unchanged credentials.
+- Protect the unified-session interval check during concurrent sends.
+- Apply participant-hash device-cache invalidation to LID, hosted and bot recipients in both send paths.
+- Keep connection handler completion pending until an active handler exits, and process retired stream errors before automatic reconnect decisions. Manual disconnect retains its five-second wait bound.
+- Keep the newest pairing secret through bursts of rotation notifications and refresh the active QR code.
+- Report the destination in `SendFBMessage` responses and decrypt full bot edits using their target message ID.
+- Dispatch full-sync fetch errors after releasing the app-state sync lock so callbacks can retry.
+- Preserve rich-response JSON objects and type names during round trips, and return malformed known-value decoding errors.
+
+- Sending a message wrapped in `AssociatedChildMessage` (for example the HD half of an image or video dual upload) now derives the stanza `type` and enc `mediatype` from the child, as WhatsApp Web does, so an HD image child is sent as `type="media"` with `mediatype="image"` instead of `type="text"`. Retry receipts use the same attributes.
+
+### Changed
+
+- Sync upstream protocol definitions and runtime changes through `c88388f983b4bc43dfd0bcc2b46969fcde82d61f`, including optional group-send permission checks, bot LID sending, unified-session sends, app-state rate-limit backoff, handshake timeout reconnects, video streaming sidecars, verified business names in `GetUserInfo` and dependency updates, while retaining HyperMeow's module path, Signal fork, bounded caches, and strict stanza tag decoding. `ResolveLID` wraps `ErrRecipientNotOnWhatsApp` when the server returns no LID.
+- Require Go 1.26 and select Go 1.27.2 as the preferred toolchain.
+- Add `SendResponse.Chat`, `Client.PreKeysUploaded`, pairing-secret rotation events, rich-response types, and bot root-secret methods on `store.ChatSettingsStore`. SQL-backed stores upgrade to schema version 19.
+- Deprecate `SetGroupDescription` in favor of `SetGroupTopic`.
+
+- `events.Message.UnwrapRaw` opens `AssociatedChildMessage`, as WhatsApp Web opens it as a future-proof wrapper, and sets the new `IsAssociatedChild` flag. The wrapper's `MessageContextInfo` (including `messageAssociation` and its parent key) is overlaid onto the child's context field by field, wrapper fields winning, as WhatsApp Web does; `RawMessage` is left unmodified. Consumers that inspected `Message.AssociatedChildMessage` after unwrapping must check `IsAssociatedChild` or `RawMessage` instead.
+
+- Synchronized native disconnect callback ownership during concurrent socket stop/close.
+
+- `RemoteSignal` implementations must provide `PreparePreKeyUpload` and `AcknowledgePreKeyUpload`. Remote prekey uploads recover the full durable pending batch across restarts and count changes, acknowledge exact ordered snapshots across ID wrap, and retry lost ACK responses without generating replacement keys. Fresh retry-receipt generation remains separate. See [remote Signal stores](README.md#remote-signal-stores).
+
+### Added
+
+- Added connection lifecycle observers with the original `ConnectContext` for Connected, Disconnected, QR, LoggedOut and StreamReplaced. Existing generic event delivery remains unchanged; delayed lifecycle events retain their original context.
+
+- Added remote Signal keys: `NewRemoteSignalClient` runs a linked device whose Signal private keys, sessions and message plaintext live in an external store reached through `RemoteSignal`. The client keeps its socket, receipts, retry receipts, prekey uploads and QR pairing, hands each received payload to the store, receives only delivery metadata (`events.RemoteMessage`), and transmits stanzas the store built with `SendPrebuiltStanza`. The store also handles identity changes (`ForgetIdentity`) and phone-number-to-LID session moves (`MigratePNToLID`). Pair-code pairing, local `SendMessage` and `SendFBMessage` return `ErrRemoteSignalUnsupported` for such clients, and `PreRetryCallback` receives a nil message.
+
+### Documentation
+
+- Added an evidence-backed comparison with upstream WhatsMeow.
+- Consolidated the root white-box test suite into themed files without removing tests or changing coverage.
+- Consolidated handwritten business-app features into `business.go` without changing the exported API.
+- Moved committed benchmark reports and heap profiles into `benchmark/barback/testdata/results`; fresh run output remains under the ignored `benchmark/barback/results` workspace.
+- Retracted every published semantic version; use `@main` for reviewed commits.
+- Established `main` as the sole production source; `dev` remains experimental.
+
+## First public release - 2026-08-10
+
+The first HyperMeow release combines the reviewed `dev` train with upstream WhatsMeow protocol updates through protobuf revision `v1044834443`.
+
+### Added
+
+- Published the standalone `github.com/polymorfa/hypermeow` module while retaining the upstream `whatsmeow` package names.
+- Added raw-node compatibility hooks for integrations that need protocol-level observation.
+- Added business linked-account and feature-eligibility reads.
+- Added business profile, cover photo, product, collection, catalog, cart, visibility, appeal, and merchant-compliance mutations.
+- Added validated business message builders for product lists, orders, addresses, lists, and native Flows.
+- Added native Flow response metadata handling and exact preservation of JSON number lexemes.
+- Added newsletter deletion through generated MEX bindings.
+- Added quick-reply app-state actions and events.
+- Added atomic label replacement and configurable label/full-sync event emission.
+- Added independent history-sync receipt, persistence, and media-deletion controls.
+- Added phone-number consent request/share message builders.
+- Added LID identity verification-code generation.
+- Added username persistence and PN/username-to-LID alias resolution across contacts, groups, notifications, and group membership changes.
+- Added optional batched reverse-LID lookup support with bounded query chunks and negative caching.
+- Added a reproducible Barback/PostgreSQL benchmark suite for DM, group, history, media, mixed messages, client memory, saturation, phone consent, business operations, and security codes.
+
+### Changed
+
+- Made LIDs the primary Signal identity while retaining phone numbers and usernames as aliases when available.
+- Reworked retry-message storage to allocate lazily and retain encoded payloads instead of full protobuf object graphs.
+- Added bounded group, device, contact, identity, migration, retry, app-state-key, and PN-to-LID caches with durable stores remaining authoritative.
+- Batched PostgreSQL session, identity, message-secret, and alias operations while retaining atomic fallbacks for generic SQL drivers.
+- Avoided empty PN-to-LID database transactions and added PostgreSQL pattern indexes for migration-prefix lookups.
+- Shared the default HTTP transport across clients while preserving isolation for custom proxy and HTTP-client configuration.
+- Preserved the newest history-sync nonce through asynchronous persistence without blocking event delivery.
+
+### Reliability
+
+- Hardened malformed and odd-length binary node decoding.
+- Serialized device save/delete operations and made overlapping history-sync nonce writes monotonic.
+- Exposed participant-hash mismatches instead of silently accepting inconsistent group state.
+- Added bounded handler queues and guarded reconnect behavior at overflow.
+- Replaced unsupported Signal-store panics with returned errors.
+- Added explicit error handling for receipt misuse, CBC invariant failures, missing signed prekeys, upload read failures, partial writes, and temporary-file cleanup.
+- Added compatibility checks and Docker build support for archived WhatsMeow and pre-optimization Barback baselines after the module-path migration.
+
+### Security and privacy
+
+- Redacted business access tokens, cookies, nonces, profile fields, and linked-account payloads from binary-node logs.
+- Added strict validation for business payload lengths, prices, product/section counts, mixed native-flow metadata, UTF-8, and trailing JSON.
+- Added privacy-cache completeness and bounded failure behavior.
+- Added atomic Signal identity insertion and deletion-generation fencing to prevent stale prekey fetches from restoring deleted identities.
+
+### Performance evidence
+
+- The frozen three-repeat system matrix completed 45 bounded workloads with no send failures, queue overflows, or temporary files left behind.
+- Against the recorded upstream revision, HyperMeow reduced allocation in all five system scenarios, reduced group-128 send p95 by 79.3%, reduced group-128 client CPU by 58.2%, and reduced group-128 SQL calls by 97.9%.
+- The isolated 2,000-client constructor benchmark measured 4,240 bytes of Go heap per HyperMeow client versus 78,929 bytes upstream, a 94.6% reduction in disconnected fixed state.
+- The encrypted ping-pong test sustained 1,700 healthy pairs per second versus 900 upstream under the same bounded local environment.
+
+See the [system comparison](benchmark/barback/testdata/results/system-comparison.md), [RAM hardening report](benchmark/barback/testdata/results/ram-hardening.md), and [saturation report](benchmark/barback/testdata/results/maxrate-ping-pong.md) for revisions, limits, caveats, and raw evidence.
+
+### Compatibility notes
+
+- Applications must migrate imports from `go.mau.fi/whatsmeow` to `github.com/polymorfa/hypermeow`.
+- A single binary must not link both modules because they register identical generated protobuf descriptors.
+- The Polymorfa Signal dependency changes exported Signal parameter types relative to upstream; other exported differences in this release are additive.

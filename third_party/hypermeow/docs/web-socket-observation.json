@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-11T02:43:22.551Z",
+  "browser": "157.0.8103.51",
+  "paired": false,
+  "title": "WhatsApp",
+  "unsupportedBrowser": false,
+  "scriptCount": 54,
+  "workers": 1,
+  "http": 200,
+  "entries": [
+    {
+      "scheme": "wss:",
+      "host": "web.whatsapp.com",
+      "port": "443",
+      "path": "/ws/chat",
+      "upgrade": 200,
+      "binarySent": 4,
+      "binaryReceived": 3
+    },
+    {
+      "scheme": "wss:",
+      "host": "web.whatsapp.com",
+      "port": "5222",
+      "path": "/ws/chat",
+      "upgrade": 101,
+      "binarySent": 0,
+      "binaryReceived": 0
+    }
+  ]
+}

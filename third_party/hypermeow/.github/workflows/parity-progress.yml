@@ -1,0 +1,61 @@
+name: Verify parity progress
+on:
+  pull_request:
+    paths:
+      - docs/parity-contract-matrix.compact.json
+      - docs/parity-progress.json
+      - docs/check-parity-progress.py
+      - docs/check-isolated-mutation-replay.py
+      - docs/compare-server-contracts.py
+      - .github/workflows/parity-progress.yml
+  push:
+    branches: [main]
+    paths:
+      - docs/parity-contract-matrix.compact.json
+      - docs/parity-progress.json
+      - docs/check-parity-progress.py
+      - docs/check-isolated-mutation-replay.py
+      - docs/compare-server-contracts.py
+      - .github/workflows/parity-progress.yml
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - id: source
+        name: Read pinned public Server Go revision
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          sha = json.loads(Path("docs/parity-progress.json").read_text())["serverRevision"]
+          if not re.fullmatch(r"[a-f0-9]{40}", sha): raise ValueError("invalid source SHA")
+          node = json.loads(Path("docs/parity-contract-matrix.compact.json").read_text())["baseline"]["node"]["sha"]
+          if not re.fullmatch(r"[a-f0-9]{40}", node): raise ValueError("invalid Node SHA")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              print("sha="+sha,file=out)
+              print("node="+node,file=out)
+          PY
+      - uses: actions/checkout@v7
+        with:
+          repository: wppconnect-team/wppconnect-server-go
+          ref: ${{ steps.source.outputs.sha }}
+          path: verified-server
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: verified-server/go.mod
+          cache-dependency-path: verified-server/go.sum
+      - run: python3 docs/check-parity-progress.py verified-server --run-fixtures
+      - run: python3 docs/check-isolated-mutation-replay.py verified-server
+      - uses: actions/checkout@v7
+        with:
+          repository: wppconnect-team/wppconnect-server
+          ref: ${{ steps.source.outputs.node }}
+          path: verified-node
+          persist-credentials: false
+      - run: python3 docs/compare-server-contracts.py verified-server verified-node

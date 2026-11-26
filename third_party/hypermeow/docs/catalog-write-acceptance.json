@@ -1,0 +1,120 @@
+{
+  "catalogRelease": {
+    "sha": "75d34044d1ec11434c0445d0000ee9caaef407e7",
+    "image": "sha256:bfb986ec5a59ee68568d58be8ad9f1d45f707b3037ee59ec2e9fb712eede48b2",
+    "sourceArchiveSha256": "304a03731c3b63e527ebeb5cac932b71b89363635bab450c3509269a97e46b9f",
+    "pr": 32,
+    "ciRun": 42917050226
+  },
+  "pool": {
+    "goReserves": 3,
+    "checkedAt": "2026-11-10T22:53:11.910068+00:00",
+    "healthy": true,
+    "pairedConnectionPreserved": true,
+    "recentCriticalErrors": 0,
+    "testAllocationsDeleted": true
+  },
+  "catalogCanary": {
+    "operations": 3,
+    "disconnectedSession": true,
+    "resultRecoveredAfterRestart": true,
+    "remoteBusinessMutations": 0
+  },
+  "chatwoot": {
+    "version": "4.19.1",
+    "provisionCI": 42915535317,
+    "realInboxStorage": "PostgreSQL",
+    "lostReplies": [
+      "contact",
+      "contact_inbox",
+      "conversation"
+    ],
+    "configuredCustomerInboxes": 0
+  },
+  "cloud": {
+    "pr": 44,
+    "revision": "87e18758da2fec1afa8ed091f0a617a53ac5c89d",
+    "githubDeployment": 7696412234,
+    "browser": [
+      {
+        "locale": "en",
+        "width": 1440,
+        "theme": "light",
+        "localizedHeading": true,
+        "catalogWrite": true,
+        "chatwootProvision": true,
+        "sectionFits": true
+      },
+      {
+        "locale": "pt",
+        "width": 375,
+        "theme": "dark",
+        "localizedHeading": true,
+        "catalogWrite": true,
+        "chatwootProvision": true,
+        "sectionFits": true
+      }
+    ],
+    "guide": {
+      "en": {
+        "status": 200,
+        "catalogTitle": "Business catalog",
+        "commerceWrite": true,
+        "chatwootProvision": true
+      },
+      "pt": {
+        "status": 200,
+        "catalogTitle": "Catálogo da empresa",
+        "commerceWrite": true,
+        "chatwootProvision": true
+      }
+    },
+    "anonymousRoutes": {
+      "create-own-collection": 401,
+      "update-own-collection": 401,
+      "set-own-product-visibility": 401,
+      "catalog-write-result": 401,
+      "not-a-cloud-action": 404
+    }
+  },
+  "redisBacklog": {
+    "ci": 42917781388,
+    "redisEvents": 32,
+    "sessions": 2,
+    "workers": 4,
+    "failedAttemptsPerEvent": 2,
+    "replayedAfterStoreReopen": 32,
+    "httpDeliveries": 32,
+    "duplicateHttpDeliveries": 0
+  },
+  "s3Recovery": {
+    "serverRevision": "43b76a436cea22af14504c6f53dbcdcdda0ee965",
+    "pr": 34,
+    "ciRun": 42918653529,
+    "storageFixture": "MinIO",
+    "uploadResponsesDroppedAfterCommit": 1,
+    "putsDuringRecovery": 0,
+    "realCustomerBuckets": 0,
+    "poolImage": "sha256:36b51d9e1a6e7aff3319d1e5c0740a9ef0eecd983be6b3828f7e933ed91ce9bc",
+    "sourceArchiveSha256": "850305fdf93229c2f182799e4b6c6f452e80b62c34a1602bd785497351c96719",
+    "goReserves": 3,
+    "poolHealthyAt": "2026-11-10T23:06:06.782763+00:00",
+    "pairedConnectionPreserved": true
+  },
+  "latestPool": {
+    "sha": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2",
+    "image": "sha256:0df0f66cacf46ce2802151e98ee51ebeabd210f9166f65bc66354a3909bae36c",
+    "previousTag": "wppconnect-local/go:43b76a436cea",
+    "sourceArchiveSha256": "dbcc73bd74460b030d9be1b1364e31635dacf22a8e316d08f56788b21faea05d",
+    "ci": 42919986810,
+    "chatwootCI": 42919986661,
+    "goReserves": 3,
+    "healthyAt": "2026-11-10T23:17:07.675798+00:00",
+    "ownerConnected": true,
+    "recentCriticalErrors": 0,
+    "temporaryContainersAbsent": true,
+    "legacyHistoryMarkerRemovedByBinary": true,
+    "firstCanaryPassed": false,
+    "isolatedCanaryRepeatPassed": true
+  }
+}

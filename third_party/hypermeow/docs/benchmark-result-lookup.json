@@ -1,0 +1,35 @@
+{
+  "fixtureImage": "sha256:59f610bd5d2060cd4b1eecff4ac134f7a41a49d696e97bdac68461b4eeff508a",
+  "source": "4fb3d7f13de475af0e6fa7bcd89b733b12105121",
+  "cpuLimit": 0.75,
+  "memoryLimitMiB": 256,
+  "workload": "authenticated lookup of four recorded disconnected-channel results",
+  "profiles": [
+    {
+      "workers": 1,
+      "requests": 24,
+      "byteIdenticalResponses": 24,
+      "p50Ms": 93.74,
+      "p95Ms": 98.5,
+      "p99Ms": 101.27,
+      "requestsPerSecond": 10.93,
+      "cpuSeconds": 1.669,
+      "peakCgroupMemoryBytes": 10575872
+    },
+    {
+      "workers": 4,
+      "requests": 48,
+      "byteIdenticalResponses": 48,
+      "p50Ms": 393.37,
+      "p95Ms": 575.48,
+      "p99Ms": 600.59,
+      "requestsPerSecond": 10.07,
+      "cpuSeconds": 3.568,
+      "peakCgroupMemoryBytes": 12894208
+    }
+  ],
+  "recordsRecoveredAfterRestart": 4,
+  "crossSessionLookupsReturned404": 4,
+  "realWhatsAppMessages": 0,
+  "fixtureRemoved": true
+}

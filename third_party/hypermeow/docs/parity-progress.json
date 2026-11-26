@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "baselineCount": 303,
+  "serverRevision": "1293a52d5bfd772ae8d8e0d53116465e295bd2fd",
+  "entries": [
+    {
+      "refs": [
+        "Z014"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-info-invite",
+      "success": 200,
+      "required": [
+        "invite"
+      ],
+      "idempotency": false,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "invite metadata, not every private response field"
+    },
+    {
+      "refs": [
+        "Z017"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "follow-newsletter-invite",
+      "success": 200,
+      "required": [
+        "invite"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "metadata precedes mutation"
+    },
+    {
+      "refs": [
+        "Z019"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "unfollow-newsletter-invite",
+      "success": 200,
+      "required": [
+        "invite"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "metadata precedes mutation"
+    },
+    {
+      "refs": [
+        "Z022"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-reaction",
+      "success": 202,
+      "required": [
+        "id",
+        "serverId",
+        "reaction"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "transport acceptance only"
+    },
+    {
+      "refs": [
+        "Z023"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-mark-viewed",
+      "success": 200,
+      "required": [
+        "id",
+        "serverIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "protocol receipt; no device rendering evidence"
+    },
+    {
+      "refs": [
+        "Z025"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-message-updates",
+      "success": 200,
+      "required": [
+        "id"
+      ],
+      "idempotency": false,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "no before filter"
+    },
+    {
+      "refs": [
+        "Z026"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-accept-tos",
+      "success": 200,
+      "required": [
+        "noticeId",
+        "stage",
+        "accepted"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "explicit consent; no real terms accepted"
+    },
+    {
+      "refs": [
+        "Z027"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "newsletter-admin-invite",
+      "success": 201,
+      "required": [
+        "id",
+        "phone"
+      ],
+      "idempotency": true,
+      "fixture": "TestNewsletterContractsAndSideEffects",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "message only; no role granted"
+    },
+    {
+      "refs": [
+        "Z249",
+        "Z250"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "own-catalog",
+      "success": 200,
+      "required": [],
+      "idempotency": false,
+      "fixture": "TestOwnCatalogScopePagingAndPricePrecision",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "own connected seller only; no live merchant acceptance"
+    },
+    {
+      "refs": [
+        "Z251"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "own-catalog-collections",
+      "success": 200,
+      "required": [],
+      "idempotency": false,
+      "fixture": "TestOwnCatalogScopePagingAndPricePrecision",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "own connected seller only; no live merchant acceptance"
+    },
+    {
+      "refs": [
+        "Z269"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "own-catalog-product",
+      "success": 200,
+      "required": [
+        "productId"
+      ],
+      "idempotency": false,
+      "fixture": "TestOwnCatalogScopePagingAndPricePrecision",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "own connected seller only; no live merchant acceptance"
+    },
+    {
+      "refs": [
+        "Z126"
+      ],
+      "journeys": [
+        "J05"
+      ],
+      "method": "post",
+      "operation": "send-carousel",
+      "success": 201,
+      "required": [
+        "phone",
+        "body",
+        "cards"
+      ],
+      "idempotency": true,
+      "fixture": "TestCarouselAllCardsValidatedBeforeAnyUploadAndReplay",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "experimental JPEG/PNG with quick replies; device test deferred"
+    },
+    {
+      "refs": [
+        "Z270"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "create-own-collection",
+      "success": 201,
+      "required": [
+        "name",
+        "productIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z274"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "update-own-collection",
+      "success": 200,
+      "required": [
+        "collectionId"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z287"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "set-own-product-visibility",
+      "success": 200,
+      "required": [
+        "productId",
+        "hidden"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z266"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "set-cart-enabled",
+      "success": 201,
+      "required": [
+        "enabled"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Both boolean values, seller scope, replay and unconfirmed results are tested. Merchant cart state has not been verified on a Business account.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z136"
+      ],
+      "journeys": [
+        "J06"
+      ],
+      "method": "post",
+      "operation": "star-message",
+      "success": 200,
+      "required": [
+        "chatId",
+        "messageId",
+        "star"
+      ],
+      "idempotency": true,
+      "fixture": "TestStarMessageContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Direct or group messages retained by the owning session. The command receipt and observed star state are separate, with no assertion of identical reference behavior.",
+      "requireKey": true,
+      "resultOperation": "message-state-result"
+    },
+    {
+      "refs": [
+        "Z290"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "delete-newsletter",
+      "success": 200,
+      "required": [
+        "id"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedNewsletterDeletion",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Only owner with supported Web payload. Matching DELETED identity, role refusal and uncertain replay tested in isolation. Real deletion deferred.",
+      "requireKey": true,
+      "resultOperation": "newsletter-admin-result"
+    },
+    {
+      "refs": [
+        "Z271"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "del-collection",
+      "success": 200,
+      "required": [
+        "collectionIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Aggregate acknowledgement with no per-ID receipt. Verify a real collection only with a Business catalog.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z282"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "add-product",
+      "success": 201,
+      "required": [
+        "product"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Full input with hosted media references and string amounts. Synthetic review status only.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z285"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "edit-product",
+      "success": 200,
+      "required": [
+        "productId",
+        "product"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Full input with explicit visibility and matching returned ID. Seller and buyer state require a Business account.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z283"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "del-products",
+      "success": 200,
+      "required": [
+        "productIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Count-only confirmation. A smaller count returns partial, an impossible count remains unconfirmed. Live Business acceptance deferred.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    }
+  ]
+}

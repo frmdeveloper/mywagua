@@ -441,7 +441,7 @@ conn["SendAudioSticker"] = func(jid string, sticker string, audio string, second
 conn["SetGroupWallpaper"] = func(jid string, image string) any {
     Jid, err := types.ParseJID(jid)
     if err != nil { return Throw(env, err) }
-    up, err := c.C.Upload(context.Background(), Atob(image), whatsmeow.MediaImage)
+    up, err := c.C.Upload(context.Background(), Atob(image), whatsmeow.MediaChatWallpaper)
     if err != nil { return Throw(env, err) }
     ok, err := c.RelayMessage(Jid.String(), &waProto.Message{
         ProtocolMessage: &waProto.ProtocolMessage{
